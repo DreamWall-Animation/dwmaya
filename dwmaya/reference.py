@@ -4,7 +4,7 @@ __license__ = 'MIT'
 
 
 import maya.cmds as mc
-from dwsmurfs.maya.hierarchy import get_closest_to_root
+from dwmaya.hierarchy import get_closest_to_root
 
 
 def add_reference(path, namespace, parent=None):

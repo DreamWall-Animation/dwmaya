@@ -5,7 +5,7 @@ __copyright__ = 'DreamWall'
 import maya.mel as mm
 import maya.cmds as mc
 
-from dwsmurfs.maya.hierarchy import get_parents
+from dwmaya.hierarchy import get_parents
 
 
 ANIMATION_CURVE_TYPES = (
