@@ -143,7 +143,7 @@ def temp_ambient_occlusion(camera):
 
 
 @contextmanager
-def dummy_context(camera):
+def dummy_context(arg=None):
     yield None
 
 
