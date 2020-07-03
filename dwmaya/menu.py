@@ -44,7 +44,7 @@ def delete_menu_with_label(label, window=MAYA_WINDOW):
         menu = get_menu_with_label(label)
 
 
-def create_dw_maya_menu(name, items):
+def create_maya_menu(name, items):
     if mc.about(batch=True):
         return
     delete_menu_with_label(name, MAYA_WINDOW)
