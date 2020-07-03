@@ -1,5 +1,6 @@
 __author__ = 'Olivier Evers'
 __copyright__ = 'DreamWall'
+__license__ = 'MIT'
 
 
 import maya.mel as mm

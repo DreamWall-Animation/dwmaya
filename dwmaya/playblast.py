@@ -39,10 +39,10 @@ def playblast(
         start = maya_playblast_kwargs['startTime']
         end = maya_playblast_kwargs['endTime']
         frames = range(start, end + 1)
+        frames_str = '%i -> %i' % (start, end)
     except KeyError:
         frames = maya_playblast_kwargs['frame']
-        start = min(frames)
-        end = max(frames)
+        frames_str = str(maya_playblast_kwargs['frame'])
 
     if mc.about(batch=True):
         # BATCH
@@ -81,29 +81,32 @@ def playblast(
             occlusion_manager = dummy_context
         with temp_tearoff_viewport(camera, model_editor_args):
             with occlusion_manager(camera):
-                print('[dw] Playblasting from %i to %i.' % (start, end))
+                print('Playblasting %s.' % frames_str)
                 return mc.playblast(**maya_playblast_kwargs)
 
 
 def _preroll_postroll_checker(
-        output_path, first_frame, last_frame, width, height, temp_directory):
+        output_path, first_frame, last_frame, width, height, camera,
+        temp_directory):
     # Playblast the four images:
     frames = [first_frame - 1, first_frame, last_frame, last_frame + 1]
-    path = playblast(
-        format='image', viewer=False, compression='jpg', orceOverwrite=True,
+    maya_playblast_kwargs = dict(
+        format='image', viewer=False, compression='jpg', forceOverwrite=True,
         quality=100, showOrnaments=False, percent=100,
-        width=width, height=height, frame=[frames])
+        width=width, height=height, frame=frames)
+    path = playblast(camera, maya_playblast_kwargs)
     images = sorted(glob.glob(path.replace('####', '*')))
     # Compose single image:
     # blend two images:
     average_image = temp_directory + '/average.png'
+    image_format = '%ix%i' % (width * 2, height)
     subprocess.call([
         'oiiotool',
         images[0], '--mulc', '0.5',
         images[1], '--mulc', '0.5', '--add',
         images[2], '--mulc', '0.5', '--origin', '+%s+0' % width, '--add',
         images[3], '--mulc', '0.5', '--origin', '+%s+0' % width, '--add',
-        '--fullsize', '3840x1080', '-o', average_image])
+        '--fullsize', image_format, '-o', average_image])
     # highlight extra frame in red:
     substraction_image = temp_directory + '/substraction.exr'
     subprocess.call([
@@ -112,27 +115,34 @@ def _preroll_postroll_checker(
         images[1], '--sub',
         images[2], '--origin', '+%s+0' % width, '--add',
         images[3], '--origin', '+%s+0' % width, '--sub',
-        '--fullsize', '3840x1080', '-o', substraction_image])
+        '--fullsize', image_format, '-o', substraction_image])
     # add red highlight to average:
-    subprocess.call(' '.join([
+    cmd = ' '.join([
         'oiiotool',
         substraction_image, '--clamp:max=0', '--mulc', '-1,-1,-1',
         '--chsum:weight=.3,.3,.3', '--ch', '0,0,0', '--mulc', '1,0,0',
         average_image, '--add',
-        '-o', output_path]))
+        '-o', output_path])
+    proc = subprocess.Popen(
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = proc.communicate()
+    if proc.returncode != 0:
+        print(out)
+        raise Exception(err)
 
 
 def preroll_postroll_checker(
-        output_path, first_frame, last_frame, temp_directory,
+        output_path, first_frame, last_frame, width, height, camera,
         remove_tmp_images=True):
-    if not temp_directory.startswith(
-            tempfile.gettempdir().replace('\\', '/')):
-        raise Exception('Wrong temp dir "%s"' % temp_directory)
-    if not os.path.exists(temp_directory):
-        os.makedirs(temp_directory)
+    temp_directory = (
+        tempfile.gettempdir().replace('\\', '/') + '/dw_prepostroll')
+    if os.path.exists(temp_directory):
+        shutil.rmtree(temp_directory)
+    os.makedirs(temp_directory)
     try:
         _preroll_postroll_checker(
-            output_path, first_frame, last_frame, temp_directory)
+            output_path, first_frame, last_frame, width, height, camera,
+            temp_directory)
     finally:
         if remove_tmp_images:
             if os.path.exists(temp_directory):
