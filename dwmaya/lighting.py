@@ -68,5 +68,5 @@ def set_lightlinking_from_dict(lightlinking):
 
 
 def set_lightlinking_from_json(json_path):
-    with open(json_path, 'w') as f:
+    with open(json_path, 'r') as f:
         set_lightlinking_from_dict(json.load(f))
