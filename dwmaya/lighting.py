@@ -65,3 +65,8 @@ def set_lightlinking_from_dict(lightlinking):
         for shadow in lightlinking[light]:
             objects = lightlinking[light][shadow]
             mc.lightlink(make=True, light=light, object=objects, shadow=shadow)
+
+
+def set_lightlinking_from_json(json_path):
+    with open(json_path, 'w') as f:
+        set_lightlinking_from_dict(json.load(f))
