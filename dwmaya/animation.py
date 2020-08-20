@@ -7,6 +7,7 @@ import maya.mel as mm
 import maya.cmds as mc
 
 from dwmaya.hierarchy import get_parents
+from contextlib import contextmanager
 
 
 ANIMATION_CURVE_TYPES = (
@@ -69,3 +70,13 @@ def has_rotated_parent_or_animated_parents(node):
         if 'constrain' in mc.nodeType(connection).lower():
             return True
     return False
+
+
+@contextmanager
+def temp_DG_evaluation():
+    initial_mode = mc.evaluationManager(query=True, mode=True)[0]
+    mc.evaluationManager(mode='off')
+    try:
+        yield None
+    finally:
+        mc.evaluationManager(mode=initial_mode)
