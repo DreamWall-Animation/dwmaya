@@ -3,10 +3,19 @@ __copyright__ = 'DreamWall'
 __license__ = 'MIT'
 
 
+import maya.OpenMaya as om
+import maya.OpenMayaUI as omui
 import maya.cmds as mc
 
 from dwmaya.attributes import get_attr, set_attr, unlock_attr
 from dwmaya.hierarchy import get_shape_and_transform
+
+
+def find_active_camera():
+    view = omui.M3dView.active3dView()
+    camera = om.MDagPath()
+    view.getCamera(camera)
+    return camera.partialPathName()
 
 
 def set_all_cameras_not_renderable():
