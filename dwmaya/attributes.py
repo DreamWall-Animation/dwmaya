@@ -38,7 +38,7 @@ def reset_animation_attributes(node):
         try:
             set_default_attribute_value(node, attr)
         except RuntimeError:
-            print 'Skipped %s' % attr
+            print('Skipped %s' % attr)
             continue
 
 

@@ -65,7 +65,7 @@ def playblast(
             t2 = time.time()
             print('Playblast took %.2f seconds to render' % (t2 - t1))
         finally:
-            print lights_display_layer
+            print(lights_display_layer)
             mc.delete(lights_display_layer)
             mc.colorManagementPrefs(
                 edit=True, outputTransformEnabled=False)

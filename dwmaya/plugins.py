@@ -31,7 +31,7 @@ def remove_unknown_plugins():
 
 def print_plugin_nodes():
     for plugin in mc.pluginInfo(query=True, listPlugins=True):
-        print plugin
+        print(plugin)
         nodes = mc.pluginInfo(plugin, query=True, dependNode=True)
         if not nodes:
             print('No nodes with this plugin\n')

@@ -67,7 +67,7 @@ def set_lightlinking_from_dict(lightlinking):
             count = len(objects)
             objects = mc.ls(objects)
             if len(objects) != count:
-                print 'Missing %i objects' % (count - len(objects))
+                print('Missing %i objects' % (count - len(objects)))
             mc.lightlink(make=True, light=light, object=objects, shadow=shadow)
 
 
