@@ -51,6 +51,32 @@ def is_parent_of(parent, node):
     return mc.ls(node, long=True)[0].startswith(mc.ls(parent, long=True)[0])
 
 
+def is_visible(node):
+    attrs = mc.listAttr(node)
+    if 'visibility' in attrs and not mc.getAttr(node + '.visibility'):
+        return False
+    if 'lodVisibility' in attrs and not mc.getAttr(node + '.lodVisibility'):
+        return False
+    if ('intermediateObject' in attrs and
+            mc.getAttr(node + '.intermediateObject')):
+        return False
+    return True
+
+
+def get_visible_children_shapes(node):
+    nodes = mc.listRelatives(node, path=True, children=True) or []
+    visible_meshes = []
+    while nodes:
+        node = nodes.pop()
+        if not is_visible(node):
+            continue
+        nodes.extend(mc.listRelatives(node, path=True, children=True) or [])
+        if not mc.nodeType(node) == 'mesh':
+            continue
+        visible_meshes.append(node)
+    return visible_meshes
+
+
 def remove_overlapping_nodes(nodes):
     """
     If a parent of a node in in the nodes list, remove it from the list.
