@@ -45,3 +45,22 @@ def find_nodetype_plugin(node_type):
     for plugin in mc.pluginInfo(query=True, listPlugins=True):
         if node_type in mc.pluginInfo(plugin, q=True, dependNode=True) or []:
             return plugin
+
+
+def ensure_plugin_loaded(*plugin_names):
+    """
+    Decorator which ensure the given plugins are
+    loaded on the function execution.
+    usage:
+    @ensure_plugin_loaded('AbcImport', 'AbcExport')
+    def export_wire_alembic():
+        blablabla ...
+    """
+    def wrap(func):
+        def decorator(*args, **kwargs):
+            for plugin_name in plugin_names:
+                if not mc.pluginInfo(plugin_name, query=True, loaded=True):
+                    load_plugin(plugin_name)
+            return func(*args, **kwargs)
+        return decorator
+    return wrap
