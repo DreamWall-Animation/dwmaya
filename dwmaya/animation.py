@@ -80,3 +80,7 @@ def temp_DG_evaluation():
         yield None
     finally:
         mc.evaluationManager(mode=initial_mode)
+
+
+def get_selected_curves():
+    return mc.keyframe(query=True, selected=True, name=True)
