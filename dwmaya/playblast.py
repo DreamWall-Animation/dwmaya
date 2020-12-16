@@ -15,7 +15,8 @@ import maya.cmds as mc
 from dwmaya.attributes import set_attr
 from dwmaya.camera import set_single_camera_renderable
 from dwmaya.viewport import (
-    temp_tearoff_viewport, temp_ambient_occlusion, dummy_context)
+    DEFAULT_MODEL_EDITOR_ARGS, temp_tearoff_viewport, temp_ambient_occlusion,
+    dummy_context)
 
 
 def get_sound_path():
@@ -52,6 +53,7 @@ def playblast(
         mc.colorManagementPrefs(edit=True, outputTransformEnabled=True)
         lights_display_layer = mc.createDisplayLayer(mc.ls(lights=True))
         set_attr(lights_display_layer, 'visibility', False)
+        result = None
         try:
             # # disable textures (default = 4):
             # set_attr('hardwareRenderingGlobals', 'renderMode', 1)
@@ -70,9 +72,9 @@ def playblast(
             mc.colorManagementPrefs(
                 edit=True, outputTransformEnabled=False)
         return result
-
     else:
         # GUI
+        model_editor_args = DEFAULT_MODEL_EDITOR_ARGS.copy()
         if ambient_occlusion is True:
             model_editor_args['useDefaultMaterial'] = True
             model_editor_args['displayLights'] = 'all'
