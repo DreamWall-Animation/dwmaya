@@ -35,7 +35,7 @@ def get_sound_path():
 
 def playblast(
         camera, maya_playblast_kwargs, model_editor_args=None,
-        ambient_occlusion=False):
+        ambient_occlusion=True):
     try:
         start = maya_playblast_kwargs['startTime']
         end = maya_playblast_kwargs['endTime']
@@ -45,10 +45,10 @@ def playblast(
         frames = maya_playblast_kwargs['frame']
         frames_str = str(maya_playblast_kwargs['frame'])
 
+    set_attr('hardwareRenderingGlobals', 'multiSampleEnable', True)
     if mc.about(batch=True):
         # BATCH
         set_single_camera_renderable(camera)
-        set_attr('hardwareRenderingGlobals', 'multiSampleEnable', True)
         set_attr('hardwareRenderingGlobals', 'textureMaxResolution', 256)
         mc.colorManagementPrefs(edit=True, outputTransformEnabled=True)
         lights_display_layer = mc.createDisplayLayer(mc.ls(lights=True))
@@ -74,15 +74,14 @@ def playblast(
         return result
     else:
         # GUI
-        model_editor_args = DEFAULT_MODEL_EDITOR_ARGS.copy()
+        full_model_editor_args = DEFAULT_MODEL_EDITOR_ARGS.copy()
+        full_model_editor_args.update(model_editor_args)
         if ambient_occlusion is True:
-            model_editor_args['useDefaultMaterial'] = True
-            model_editor_args['displayLights'] = 'all'
             occlusion_manager = temp_ambient_occlusion
         else:
             occlusion_manager = dummy_context
-        with temp_tearoff_viewport(camera, model_editor_args):
-            with occlusion_manager(camera):
+        with temp_tearoff_viewport(camera, full_model_editor_args):
+            with occlusion_manager():
                 print('Playblasting %s.' % frames_str)
                 return mc.playblast(**maya_playblast_kwargs)
 

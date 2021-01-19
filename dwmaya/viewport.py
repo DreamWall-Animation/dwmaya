@@ -60,9 +60,9 @@ DEFAULT_MODEL_EDITOR_ARGS = dict(
     wireframeOnShaded=False)
 
 AO_SETTINGS = dict(
-    ssaoRadius=1,
-    ssaoFilterRadius=1,
-    ssaoAmount=1,
+    ssaoRadius=24,
+    ssaoFilterRadius=24,
+    ssaoAmount=1.1,
     ssaoEnable=1,
     ssaoSamples=32,
     multiSampleEnable=1)
@@ -117,26 +117,16 @@ def temp_tearoff_viewport(camera, model_editor_args=None, size=None):
 
 
 @contextmanager
-def temp_ambient_occlusion(camera):
+def temp_ambient_occlusion(occlusion_settings=None):
+    occlusion_settings = occlusion_settings or AO_SETTINGS
     # Setup VP2 settings
     old_values = dict()
     for attr, value in AO_SETTINGS.items():
         old_values[attr] = mc.getAttr('hardwareRenderingGlobals.' + attr)
-        mc.setAttr('hardwareRenderingGlobals.' + attr, AO_SETTINGS[attr])
-    # Create lights
-    directional = mc.directionalLight(intensity=-.4)
-    ambient = mc.ambientLight(intensity=1)
-    transforms = []
-    for light in [directional, ambient]:
-        transform = mc.listRelatives(light, parent=True)[0]
-        transforms.append(transform)
-        mc.parent(light, camera)
-        mc.rotate(0, 0, 0, transform, objectSpace=True)
-        mc.move(0, 0, 0, transform, objectSpace=True)
+        mc.setAttr('hardwareRenderingGlobals.' + attr, value)
     try:
         yield None
     finally:
-        mc.delete(transforms)
         # Reset VP2
         for attr, value in AO_SETTINGS.items():
             mc.setAttr('hardwareRenderingGlobals.' + attr, old_values[attr])
