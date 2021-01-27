@@ -19,7 +19,7 @@ def get_anim_curves():
 
 
 def get_animated_nodes():
-    return mc.listConnections(get_anim_curves(), path=True) or []
+    return mc.listConnections(get_anim_curves()) or []
 
 
 def copy_position_rotation_scale(source, target):
