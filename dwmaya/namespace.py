@@ -1,3 +1,8 @@
+__author__ = 'Lionel Brouyere, Olivier Evers'
+__copyright__ = 'DreamWall'
+__license__ = 'MIT'
+
+
 from contextlib import contextmanager
 import maya.cmds as mc
 
@@ -16,7 +21,7 @@ def maya_namespace(
                 namespace = mc.namespace(addNamespace=namespace)
             else:
                 mc.namespace(initial_namespace)
-                raise ValueError(namespace + " doesn't exists.")
+                raise ValueError(namespace + " doesn't exist.")
         mc.namespace(setNamespace=namespace)
         yield namespace
     finally:
