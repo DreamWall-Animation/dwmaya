@@ -13,7 +13,8 @@ class MayaNamespace():
 
     def __enter__(self):
         if not mc.namespace(absoluteName=True, exists=self.namespace):
-            if self.create_if_missing: mc.namespace(setNamespace=":")
+            if self.create_if_missing:
+                mc.namespace(setNamespace=":")
                 self.namespace = mc.namespace(addNamespace=self.namespace)
             else:
                 mc.namespace(self.original_namespace)
