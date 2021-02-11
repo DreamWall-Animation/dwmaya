@@ -121,7 +121,7 @@ def temp_ambient_occlusion(occlusion_settings=None):
     occlusion_settings = occlusion_settings or AO_SETTINGS
     # Setup VP2 settings
     old_values = dict()
-    for attr, value in AO_SETTINGS.items():
+    for attr, value in occlusion_settings.items():
         old_values[attr] = mc.getAttr('hardwareRenderingGlobals.' + attr)
         mc.setAttr('hardwareRenderingGlobals.' + attr, value)
     try:
