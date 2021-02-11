@@ -1,28 +1,24 @@
+from contextlib import contextmanager
 import maya.cmds as mc
 
 
-class MayaNamespace():
-    """ Context manager to set temporarily a namespace 
-    """
-    def __init__(
-            self, namespace="", create_if_missing=True, leave_on_exit=True):
-        self.original_namespace = ":" + mc.namespaceInfo(currentNamespace=True)
-        self.create_if_missing = create_if_missing
-        self.namespace = ":" + namespace
-        self.leave_on_exit = leave_on_exit
-
-    def __enter__(self):
-        if not mc.namespace(absoluteName=True, exists=self.namespace):
-            if self.create_if_missing:
-                mc.namespace(setNamespace=":")
-                self.namespace = mc.namespace(addNamespace=self.namespace)
+@contextmanager
+def maya_namespace(
+        namespace='', create_if_missing=True, restore_current_namespace=True):
+    """Context manager to temporarily set a namespace"""
+    initial_namespace = ':' + mc.namespaceInfo(currentNamespace=True)
+    if not namespace.startswith(':'):
+        namespace = ':' + namespace
+    try:
+        if not mc.namespace(absoluteName=True, exists=namespace):
+            if create_if_missing:
+                mc.namespace(setNamespace=':')
+                namespace = mc.namespace(addNamespace=namespace)
             else:
-                mc.namespace(self.original_namespace)
-                raise ValueError(self.namespace + " doesn't exists.")
-        mc.namespace(setNamespace=self.namespace)
-        return self.namespace
-
-    def __exit__(self, type, value, traceback):
-        if not self.leave_on_exit:
-            return True mc.namespace(setNamespace=self.original_namespace)
-        return True
+                mc.namespace(initial_namespace)
+                raise ValueError(namespace + " doesn't exists.")
+        mc.namespace(setNamespace=namespace)
+        yield namespace
+    finally:
+        if restore_current_namespace:
+            mc.namespace(setNamespace=initial_namespace)
