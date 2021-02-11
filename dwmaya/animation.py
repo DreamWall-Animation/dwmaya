@@ -3,11 +3,13 @@ __copyright__ = 'DreamWall'
 __license__ = 'MIT'
 
 
+from functools import partial
+from contextlib import contextmanager
+
 import maya.mel as mm
 import maya.cmds as mc
 
 from dwmaya.hierarchy import get_parents
-from contextlib import contextmanager
 
 
 ANIMATION_CURVE_TYPES = (
@@ -84,3 +86,26 @@ def temp_DG_evaluation():
 
 def get_selected_curves():
     return mc.keyframe(query=True, selected=True, name=True)
+
+
+def retime(
+        animation_curves, first_frame, last_frame, new_last_frame,
+        offset_following_animation=True, snap_keys=True):
+    """Scale time range but also offset what's after to keep continuity"""
+    offset = new_last_frame - last_frame
+    if offset == 0:
+        return
+    last_keyframe = max(mc.keyframe(animation_curves, query=True))
+    offset_function = partial(
+        mc.keyframe, animation_curves, edit=True,
+        t=(last_frame + 1, last_keyframe), relative=True,
+        timeChange=offset, option='over')
+    if offset_following_animation and offset > 0:
+        offset_function()
+    mc.scaleKey(
+        animation_curves, time=(first_frame, last_frame),
+        newStartTime=first_frame, newEndTime=new_last_frame)
+    if snap_keys:   
+        mc.snapKey(animation_curves, t=(first_frame, new_last_frame))
+    if offset_following_animation and offset < 0:
+        offset_function()
