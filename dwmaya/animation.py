@@ -89,23 +89,43 @@ def get_selected_curves():
 
 
 def retime(
-        animation_curves, first_frame, last_frame, new_last_frame,
-        offset_following_animation=True, snap_keys=True):
-    """Scale time range but also offset what's after to keep continuity"""
-    offset = new_last_frame - last_frame
-    if offset == 0:
-        return
-    last_keyframe = max(mc.keyframe(animation_curves, query=True))
-    offset_function = partial(
+        animation_curves,
+        start_frame, end_frame,
+        new_start_frame, new_end_frame,
+        offset_contiguous_animation=True, snap_keys=True):
+    """Scale time range but also offset what's contiguous to keep continuity"""
+    # Define offsets happening before and after:
+    end_offset = new_end_frame - end_frame
+    start_offset = new_start_frame - start_frame
+
+    # Define offset functions:
+    keys = mc.keyframe(animation_curves, query=True)
+    max_keyframe = max(keys) + start_offset + end_offset
+    offset_after_function = partial(
         mc.keyframe, animation_curves, edit=True,
-        t=(last_frame + 1, last_keyframe), relative=True,
-        timeChange=offset, option='over')
-    if offset_following_animation and offset > 0:
-        offset_function()
+        t=(end_frame + 1, max_keyframe), relative=True,
+        timeChange=end_offset, option='over')
+    min_keyframe = min(keys) - end_offset - start_offset
+    offset_before_function = partial(
+        mc.keyframe, animation_curves, edit=True,
+        t=(min_keyframe, start_frame - 1), relative=True,
+        timeChange=start_offset, option='over')
+
+    # Offsets in case of expansion:
+    if offset_contiguous_animation and end_offset > 0:
+        offset_after_function()
+    if offset_contiguous_animation and start_offset < 0:
+        offset_before_function()
+
+    # Retime/scale animation:
     mc.scaleKey(
-        animation_curves, time=(first_frame, last_frame),
-        newStartTime=first_frame, newEndTime=new_last_frame)
+        animation_curves, time=(start_frame, end_frame),
+        newStartTime=new_start_frame, newEndTime=new_end_frame)
     if snap_keys:   
-        mc.snapKey(animation_curves, t=(first_frame, new_last_frame))
-    if offset_following_animation and offset < 0:
-        offset_function()
+        mc.snapKey(animation_curves, t=(start_frame, new_end_frame))
+
+    # Offsets in case of shrinking:
+    if offset_contiguous_animation and end_offset < 0:
+        offset_after_function()
+    if offset_contiguous_animation and start_offset > 0:
+        offset_before_function()
