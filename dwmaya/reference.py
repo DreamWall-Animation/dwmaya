@@ -26,12 +26,15 @@ def import_reference(refnode):
     mc.file(path, importReference=True, force=True)
 
 
-def get_reference_root_nodes(refnode):
+def get_reference_nodes(refnode):
     try:
-        nodes = mc.referenceQuery(refnode, nodes=True)
+        return mc.referenceQuery(refnode, nodes=True, dagPath=True)
     except RuntimeError:
         return []
-    return get_closest_to_root(nodes)
+
+
+def get_reference_root_nodes(refnode):
+    return get_closest_to_root(get_reference_nodes(refnode))
 
 
 def get_references():
