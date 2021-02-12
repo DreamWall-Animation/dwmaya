@@ -122,7 +122,7 @@ def retime(
         animation_curves, time=(start_frame, end_frame),
         newStartTime=new_start_frame, newEndTime=new_end_frame)
     if snap_keys:   
-        mc.snapKey(animation_curves, t=(start_frame, new_end_frame))
+        mc.snapKey(animation_curves, t=(new_start_frame, new_end_frame))
 
     # Offsets in case of shrinking:
     if offset_contiguous_animation and end_offset < 0:
