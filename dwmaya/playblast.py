@@ -45,7 +45,6 @@ def playblast(
         frames = maya_playblast_kwargs['frame']
         frames_str = str(maya_playblast_kwargs['frame'])
 
-    set_attr('hardwareRenderingGlobals', 'multiSampleEnable', True)
     if mc.about(batch=True):
         # BATCH
         set_single_camera_renderable(camera)
