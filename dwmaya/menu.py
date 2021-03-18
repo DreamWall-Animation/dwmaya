@@ -34,7 +34,7 @@ def get_menu_with_label(label, window=MAYA_WINDOW):
     try:
         return labels_menus[label]
     except KeyError:
-        return ''
+        return None
 
 
 def delete_menu_with_label(label, window=MAYA_WINDOW):
@@ -44,11 +44,61 @@ def delete_menu_with_label(label, window=MAYA_WINDOW):
         menu = get_menu_with_label(label)
 
 
-def create_maya_menu(name, items):
+def create(name, items, append=True):
     if mc.about(batch=True):
         return
-    delete_menu_with_label(name, MAYA_WINDOW)
-    dw_menu = mc.menu(
-        'dwmenu', label=name, parent=MAYA_WINDOW, tearOff=True)
+    menu = None
+    if append:
+        menu = get_menu_with_label(name)
+    else:
+        delete_menu_with_label(name, MAYA_WINDOW)
+    if not menu:
+        menu = mc.menu(label=name, parent=MAYA_WINDOW, tearOff=True)
     for menu_item in items:
-        add_menu_item(menu_item, dw_menu)
+        add_menu_item(menu_item, menu)
+
+
+create_maya_menu = create  # for backwards compatibility
+
+
+if __name__ == '__main__':
+    def create_cube(maya_useless_ui_arg=None):
+        mc.polyCube()
+
+    EXAMPLE_MENU = [
+        dict(
+            label="farm_launcher",
+            icon="shelves/farm_launcher.png",
+            command='print "test"'),
+        dict(
+            label="asset_getter",
+            icon="shelves/asset_getter.png",
+            command=create_cube),
+        dict(
+            label="asset_committer",
+            icon="shelves/asset_committer.png",
+            command='print "test"'),
+        SEPARATOR,
+        dict(
+            label="create cube",
+            icon="cube.png",
+            command=create_cube),
+        dict(
+            label="submenu",
+            icon="shelves/playblast2.png",
+            command=[
+                dict(label='first menu item',
+                     command='import maya.cmds as mc;mc.polyCube()'),
+                SEPARATOR,
+                dict(label='mc.polyCube',
+                     command=create_cube)]),
+        dict(
+            label="submenu 2",
+            icon="shelves/arnoldLightRig.png",
+            command=[
+                dict(label='first menu item',
+                     command=create_cube),
+                dict(label='another menu item',
+                     command=create_cube)])]
+
+    create('Example menu', EXAMPLE_MENU, append=False)
