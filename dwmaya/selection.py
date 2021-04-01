@@ -30,6 +30,7 @@ __license__ = 'MIT'
 
 
 from functools import wraps
+from contextlib import contextmanager
 import maya.cmds as mc
 
 
@@ -40,11 +41,27 @@ def preserve_selection(func):
     '''
     @wraps(func)
     def wrapper(*args, **kwargs):
-        selection = mc.ls(sl=True)
+        selection = mc.ls(selection=True)
         result = func(*args, **kwargs)
-        mc.select(selection)
+        if selection:
+            mc.select(selection, noExpand=True)
+        else:
+            mc.select(clear=True)
         return result
     return wrapper
+
+
+@contextmanager
+def preserve_selection_ctx():
+    """Context manager to preserve selection"""
+    selection = mc.ls(selection=True)
+    try:
+        yield
+    finally:
+        if selection:
+            mc.select(selection, noExpand=True)
+        else:
+            mc.select(clear=True)
 
 
 def selection_required(func):
