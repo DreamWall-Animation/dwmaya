@@ -41,10 +41,8 @@ def preserve_selection(func):
     '''
     @wraps(func)
     def wrapper(*args, **kwargs):
-        selection = mc.ls(selection=True)
         with preserve_selection_ctx():
-            result = func(*args, **kwargs)
-        return result
+            return func(*args, **kwargs)
     return wrapper
 
 
