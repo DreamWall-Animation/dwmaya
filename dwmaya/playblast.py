@@ -36,10 +36,11 @@ def get_sound_path():
 def playblast(
         camera, maya_playblast_kwargs, model_editor_args=None,
         ambient_occlusion=True):
+    model_editor_args = model_editor_args or dict()
     try:
         start = maya_playblast_kwargs['startTime']
         end = maya_playblast_kwargs['endTime']
-        frames = range(start, end + 1)
+        frames = range(int(start), int(end + 1))
         frames_str = '%i -> %i' % (start, end)
     except KeyError:
         frames = maya_playblast_kwargs['frame']
