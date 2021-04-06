@@ -6,8 +6,11 @@ __license__ = 'MIT'
 import time
 from functools import partial
 from contextlib import contextmanager
+
 import maya.cmds as mc
+
 from dwmaya.qt import get_screen_size
+from dwmaya.attributes import get_attr, set_attr
 
 
 DEFAULT_MODEL_EDITOR_ARGS = dict(
@@ -121,15 +124,17 @@ def temp_ambient_occlusion(occlusion_settings=None):
     occlusion_settings = occlusion_settings or AO_SETTINGS
     # Setup VP2 settings
     old_values = dict()
+    vp_node = 'hardwareRenderingGlobals'
     for attr, value in occlusion_settings.items():
-        old_values[attr] = mc.getAttr('hardwareRenderingGlobals.' + attr)
-        mc.setAttr('hardwareRenderingGlobals.' + attr, value)
+        old_values[attr] = get_attr(vp_node, attr)
+        set_attr(vp_node, attr, value)
     try:
         yield None
     finally:
         # Reset VP2
         for attr, value in AO_SETTINGS.items():
-            mc.setAttr('hardwareRenderingGlobals.' + attr, old_values[attr])
+            value = old_values[attr]
+            set_attr(vp_node, attr, value)
 
 
 @contextmanager

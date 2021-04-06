@@ -11,13 +11,17 @@ def get_attr(node, attr):
     return mc.getAttr('%s.%s' % (node, attr))
 
 
-def set_attr(node, attr, value):
+def set_attr(node, attr, value, skip_locked_connected=False):
+    attribute = '%s.%s' % (node, attr)
+    if skip_locked_connected:
+        if mc.getAttr(attribute, locked=True) or mc.listConnections(attribute):
+            return
     if isinstance(value, list):
-        mc.setAttr('%s.%s' % (node, attr), *value)
+        mc.setAttr(attribute, *value)
     elif isinstance(value, basestring):
-        mc.setAttr('%s.%s' % (node, attr), value, type='string')
+        mc.setAttr(attribute, value, type='string')
     else:
-        mc.setAttr('%s.%s' % (node, attr), value)
+        mc.setAttr(attribute, value)
 
 
 def lock_attr(node, attr):
