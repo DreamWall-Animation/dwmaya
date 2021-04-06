@@ -129,3 +129,13 @@ def retime(
         offset_after_function()
     if offset_contiguous_animation and start_offset > 0:
         offset_before_function()
+
+
+def get_current_time_range():
+    if not mc.about(batch=True):
+        start, end = mc.timeControl(
+            'timeControl1', query=True, rangeArray=True)
+    if mc.about(batch=True) or end - start == 1:
+        start = mc.playbackOptions(query=True, animationStartTime=True)
+        end = mc.playbackOptions(query=True, animationEndTime=True)
+    return start, end
