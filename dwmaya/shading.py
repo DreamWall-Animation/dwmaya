@@ -14,6 +14,10 @@ def get_shading_assignments():
     return assignments
 
 
+def assign_material(shading_engine, objects):
+    mc.sets(objects, forceElement=shading_engine)
+
+
 def create_material(shader_type):
     shader = mc.shadingNode(shader_type, asShader=True)
     shadingEngine = shader + 'SG'
@@ -45,6 +49,21 @@ def set_texture(attribute, texture_path):
         connectAttr -f {p2t}.vertexCameraOne {fn}.vertexCameraOne;
         connectAttr {p2t}.outUV {fn}.uv;
         connectAttr {p2t}.outUvFilterSize {fn}.uvFilterSize;
-        connectAttr -force {fn}.outAlpha {attribute};'''.format(
+        connectAttr -force {fn}.outColor {attribute};'''.format(
             p2t=p2t_node, fn=file_node, attribute=attribute))
     mc.setAttr(file_node + '.fileTextureName', texture_path, type='string')
+    return file_node
+
+
+def project_texture(file_node, camera=None):
+    target_attr = mc.listConnections(file_node + '.outColor', plugs=True)[0]
+    projection = mc.shadingNode('projection', asTexture=True)
+    mc.connectAttr(file_node + '.outColor', projection + '.image')
+    mc.connectAttr(projection + '.outColor', target_attr, force=True)
+    if camera:
+        mc.setAttr(projection + '.projType', 8)  # camera projection
+        mc.connectAttr(camera + '.message', projection + '.linkedCamera')
+    else:
+        place3d_texture = mc.shadingNode('place3dTexture', asUtility=True)
+        mc.connectAttr(place3d_texture + '.wim[0]', projection + '.pm')
+    return projection
