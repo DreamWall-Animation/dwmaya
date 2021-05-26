@@ -27,3 +27,23 @@ def open_file_with_default_app(path):
         subprocess.Popen(['xdg-open', path])
     elif system == 'Mac':
         subprocess.Popen(['open', path])
+
+
+def save_if_modified_prompt(dont_save_returns=True):
+    if not mc.file(query=True, modified=True):
+        return True
+
+    current_scene_path = get_scene_path()
+    save, dont_save, cancel = 'Save', "Don't save", 'Cancel'
+    choice = mc.confirmDialog(
+        title='Save changes',
+        message='Save changes to %s ?' % current_scene_path,
+        button=[save, dont_save, cancel])
+
+    if choice == cancel:
+        return False
+    elif choice == dont_save:
+        return dont_save_returns
+    elif choice == save:
+        mc.file(save=True)
+        return True
