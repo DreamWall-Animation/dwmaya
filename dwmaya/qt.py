@@ -44,7 +44,7 @@ def choice_prompt(text, title='', batch=None):
         return True
 
 
-def chose_from_list_prompt(choices, text='', position=None):
+def chose_from_list_prompt(choices, text='', position=None, buttons_height=21):
     dialog = QtWidgets.QDialog()
     dialog.setWindowFlags(QtCore.Qt.CustomizeWindowHint)
     dialog.setMaximumWidth(1500)
@@ -78,12 +78,12 @@ def chose_from_list_prompt(choices, text='', position=None):
         button = QtWidgets.QPushButton(label)
         button.clicked.connect(dialog.accept)
         button.clicked.connect(partial(chosen_value.append, value))
-        button.setMaximumHeight(21)
+        button.setMaximumHeight(buttons_height)
         scroll_panel_layout.addWidget(button)
 
     button = QtWidgets.QPushButton(
         'Cancel', styleSheet='background-color:#373737')
-    button.setMaximumHeight(21)
+    button.setMaximumHeight(buttons_height)
     button.clicked.connect(dialog.accept)
     scroll_panel_layout.addWidget(button)
     scroll_panel_layout.addStretch()
