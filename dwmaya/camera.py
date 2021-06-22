@@ -29,7 +29,7 @@ def set_all_cameras_not_renderable():
             print('Could not set %s.renderable to False' % cam)
 
 
-def transfer_camera_framing(source_cam, target_cam):
+def transfer_camera_framing(source_cam, target_cam, fov=True):
     source_cam, source_transform = get_shape_and_transform(source_cam)
     target_cam, target_transform = get_shape_and_transform(target_cam)
     # Copy transform:
@@ -37,15 +37,16 @@ def transfer_camera_framing(source_cam, target_cam):
         source_transform, query=True, matrix=True, worldSpace=True)
     mc.xform(target_transform, matrix=world_matrix)
     # Copy camera stuff:
-    attributes = [
-        'horizontalFilmAperture',
-        'verticalFilmAperture',
-        'focalLength',
-        'filmFit',
-    ]
-    for attr in attributes:
-        value = get_attr(source_cam, attr)
-        set_attr(target_cam, attr, value)
+    if fov:
+        attributes = [
+            'horizontalFilmAperture',
+            'verticalFilmAperture',
+            'focalLength',
+            'filmFit',
+        ]
+        for attr in attributes:
+            value = get_attr(source_cam, attr)
+            set_attr(target_cam, attr, value)
 
 
 def set_single_camera_renderable(cam):
