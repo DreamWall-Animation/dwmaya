@@ -19,18 +19,32 @@ from dwmaya.viewport import (
     dummy_context)
 
 
-def get_sound_path():
+def get_sound_node():
     sound_node = mc.timeControl('timeControl1', query=True, sound=True)
     if not sound_node:
         sound_nodes = mc.ls(type='audio')
         if len(sound_nodes) != 1:
             return
         sound_node = sound_nodes[0]
+    return sound_node
+
+
+def get_sound_path():
+    sound_node = get_sound_node()
+    if not sound_node:
+        return
     path = os.path.expandvars(mc.getAttr(sound_node + '.filename'))
     if os.path.exists(path):
         return path
     else:
         mc.warning('Sound path does not exist !')
+
+
+def get_sound_offset():
+    sound_node = get_sound_node()
+    if not sound_node:
+        return
+    return mc.getAttr(sound_node + '.offset')
 
 
 def playblast(
