@@ -89,10 +89,20 @@ def get_selected_curves():
 
 
 def delete_non_integer_keys():
-    times = mc.keyframe(query=True, timeChange=True)
-    non_integer = list(set([t for t in times if t != int(t)]))
-    for time in non_integer:
-        mc.cutKey(time=(time, time))
+    anim_curves = mc.keyframe(query=True, selected=True, name=True)
+    if not anim_curves:
+        times = mc.keyframe(query=True, timeChange=True)
+        non_integer = list(set([t for t in times if t != int(t)]))
+        for time in non_integer:
+            mc.cutKey(time=(time, time))
+    else:
+        curves_keyframes = {
+            curve: mc.keyframe(curve, query=True, selected=True) for
+            curve in anim_curves}
+        for curve, times in curves_keyframes.items():
+            non_integer = list(set([t for t in times if t != int(t)]))
+            for time in non_integer:
+                mc.cutKey(curve, time=(time, time))
 
 
 def retime(
