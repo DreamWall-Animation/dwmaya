@@ -7,6 +7,15 @@ from contextlib import contextmanager
 import maya.cmds as mc
 
 
+def get_non_existing_namespace(prefix='dw'):
+    i = 0
+    namespace = '%s%i' % (prefix, i)
+    while namespace in mc.namespaceInfo(listNamespace=True):
+        i += 1
+        namespace = '%s%i' % (prefix, i)
+    return namespace
+
+
 @contextmanager
 def maya_namespace(
         namespace='', create_if_missing=True, restore_current_namespace=True):
