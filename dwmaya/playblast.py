@@ -11,6 +11,7 @@ import tempfile
 import subprocess
 
 import maya.cmds as mc
+import maya.OpenMaya as om
 
 from dwmaya.attributes import set_attr
 from dwmaya.camera import set_single_camera_renderable
@@ -72,12 +73,15 @@ def playblast(
             # # disable textures (default = 4):
             # set_attr('hardwareRenderingGlobals', 'renderMode', 1)
             t1 = time.time()
-            for frame in frames:
-                mc.currentTime(frame)
-                mc.evaluationManager(mode='off')
+
+            def force_eval(mtime, _):
                 # Without dgdirty some animation were not updated in mayapy
                 mc.dgdirty(allPlugs=True)
-                result = mc.playblast(**maya_playblast_kwargs)
+
+            callback = om.MDGMessage.addTimeChangeCallback(force_eval)
+            mc.evaluationManager(mode='off')
+            result = mc.playblast(**maya_playblast_kwargs)
+            om.MEventMessage.removeCallback(callback)
             t2 = time.time()
             print('Playblast took %.2f seconds to render' % (t2 - t1))
         finally:
