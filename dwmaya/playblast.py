@@ -79,9 +79,11 @@ def playblast(
                 mc.dgdirty(allPlugs=True)
 
             callback = om.MDGMessage.addTimeChangeCallback(force_eval)
-            mc.evaluationManager(mode='off')
-            result = mc.playblast(**maya_playblast_kwargs)
-            om.MEventMessage.removeCallback(callback)
+            try:
+                mc.evaluationManager(mode='off')
+                result = mc.playblast(**maya_playblast_kwargs)
+            finally:
+                om.MEventMessage.removeCallback(callback)
             t2 = time.time()
             print('Playblast took %.2f seconds to render' % (t2 - t1))
         finally:
