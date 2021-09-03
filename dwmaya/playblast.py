@@ -11,6 +11,7 @@ import tempfile
 import subprocess
 
 import maya.cmds as mc
+import maya.mel as mm
 import maya.OpenMaya as om
 
 from dwmaya.attributes import set_attr
@@ -50,15 +51,13 @@ def get_sound_offset():
 
 def playblast(
         camera, maya_playblast_kwargs, model_editor_args=None,
-        ambient_occlusion=True):
+        ambient_occlusion=True, generate_uvtiles_previews=False):
     model_editor_args = model_editor_args or dict()
     try:
         start = maya_playblast_kwargs['startTime']
         end = maya_playblast_kwargs['endTime']
-        frames = range(int(start), int(end + 1))
         frames_str = '%i -> %i' % (start, end)
     except KeyError:
-        frames = maya_playblast_kwargs['frame']
         frames_str = str(maya_playblast_kwargs['frame'])
 
     if mc.about(batch=True):
@@ -103,6 +102,8 @@ def playblast(
         with temp_tearoff_viewport(camera, full_model_editor_args):
             with occlusion_manager():
                 print('Playblasting %s.' % frames_str)
+                if generate_uvtiles_previews:
+                    mm.eval('generateAllUvTilePreviews;')
                 return mc.playblast(**maya_playblast_kwargs)
 
 
