@@ -1,10 +1,18 @@
-__author__ = 'Olivier Evers'
+__author__ = 'Lionel Brouyere, Olivier Evers'
 __copyright__ = 'DreamWall'
 __license__ = 'MIT'
 
 
 import maya.cmds as mc
 import pymel.core as pm
+
+
+def node_name(attr):
+    return attr.split(".")[0]
+
+
+def attr_name(attr):
+    return ".".join(attr.split(".")[1:])
 
 
 def get_attr(node, attr):

@@ -1,16 +1,29 @@
-from maya import cmds
+__author__ = 'Lionel Brouyere, Olivier Evers'
+__copyright__ = 'DreamWall'
+__license__ = 'MIT'
+
+
+import maya.cmds as mc
 import maya.api.OpenMaya as om2
 import maya.api.OpenMayaAnim as oma2
-from logging import getlogger
 
-from __namespace import strip_namespaces
-from __attributes import attribute_name
-
-logger = getlogger()
+from dwmaya.namespace import strip_namespaces
 
 
-ANIMATION_CURVES_TYPES = (
+ANIMATION_CURVE_TYPES = (
     "animCurveTA", "animCurveTL", "animCurveTT", "animCurveTU")
+
+
+def get_animated_nodes():
+    return mc.listConnections(get_anim_curves()) or []
+
+
+def get_anim_curves():
+    return mc.ls(type=ANIMATION_CURVE_TYPES)
+
+
+def get_selected_curves():
+    return mc.keyframe(query=True, selected=True, name=True)
 
 
 def list_curves_with_infinite_set(
@@ -24,11 +37,11 @@ def list_curves_with_infinite_set(
     TT, TA, TL
     :rtype: list() of str
     """
-    curves = curves or cmds.ls(type=types or ANIMATION_CURVES_TYPES)
+    curves = curves or mc.ls(type=types or ANIMATION_CURVE_TYPES)
     if pre:
-        curves = [c for c in curves if cmds.getAttr(c + ".preInfinity")]
+        curves = [c for c in curves if mc.getAttr(c + ".preInfinity")]
     if post:
-        curves = [c for c in curves if cmds.getAttr(c + ".postInfinity")]
+        curves = [c for c in curves if mc.getAttr(c + ".postInfinity")]
     return curves
 
 
@@ -42,11 +55,11 @@ def list_curves_with_namespace(
     TT, TA, TL
     :rtype: list() of str
     """
-    curves = curves or cmds.ls(type=types or ANIMATION_CURVES_TYPES)
+    curves = curves or mc.ls(type=types or ANIMATION_CURVE_TYPES)
     if exclude_references:
         curves = [
             curve for curve in curves
-            if not cmds.referenceQuery(curve, isNodeReferenced=True)]
+            if not mc.referenceQuery(curve, isNodeReferenced=True)]
     return [curve for curve in curves if ":" in curve]
 
 
@@ -59,7 +72,7 @@ def strip_curves_namespaces(curves=None, types=None):
     """
     curves = list_curves_with_namespace(curves, exclude_references=True, types=types)
     for curve in curves:
-        cmds.rename(curve, strip_namespaces(curve))
+        mc.rename(curve, strip_namespaces(curve))
 
 
 def node_names_to_mfn_anim_curves(nodes):
@@ -88,7 +101,7 @@ def list_non_static_anim_curves(curves=None, types=None):
     TT, TA, TL
     :rtype: list() of str
     """
-    anim_curves = curves or cmds.ls(type=types or ANIMATION_CURVES_TYPES)
+    anim_curves = curves or mc.ls(type=types or ANIMATION_CURVE_TYPES)
     anim_curves = node_names_to_mfn_anim_curves(anim_curves)
     return [c.name() for c in anim_curves if not c.isStatic]
 
@@ -99,9 +112,9 @@ def delete_unconnected_anim_curves(types=None):
     :param types: str or tuple() of str. Type of animation curves animCurveTU,
     TT, TA, TL
     """
-    cmds.delete([
-        curve for curve in cmds.ls(type=types or ANIMATION_CURVES_TYPES)
-        if not cmds.listConnections(curve)])
+    mc.delete([
+        curve for curve in mc.ls(type=types or ANIMATION_CURVE_TYPES)
+        if not mc.listConnections(curve)])
 
 
 def find_anim_curve_source(plug):
@@ -111,11 +124,11 @@ def find_anim_curve_source(plug):
     :param str plug: Maya plug path as string.
     :rtype: str Maya anim curve node name.
     """
-    source = cmds.connectionInfo(plug, sourceFromDestination=True)
+    source = mc.connectionInfo(plug, sourceFromDestination=True)
     while source:
-        if cmds.nodeType(source) in ANIMATION_CURVES_TYPES:
+        if mc.nodeType(source) in ANIMATION_CURVE_TYPES:
             return source.split(".")[0]
-        source = cmds.connectionInfo(source, sourceFromDestination=True)
+        source = mc.connectionInfo(source, sourceFromDestination=True)
 
 
 def delete_connected_curves(node):
@@ -123,69 +136,11 @@ def delete_connected_curves(node):
     delete animation curves connected to given node.
     :param str node: Maya node name.
     """
-    for type_ in ANIMATION_CURVES_TYPES:
+    for type_ in ANIMATION_CURVE_TYPES:
         anim_curves = list({
             curve.split(".")[0] for curve in
-            cmds.listConnections(node, type=type_, plugs=True, source=True)
+            mc.listConnections(node, type=type_, plugs=True, source=True)
             or []})
         if not anim_curves:
             continue
-        cmds.delete(anim_curves)
-
-
-def copy_animation(source, destination, offset=0):
-    """
-    Copy animation from source to destination
-    :param str source: Transform node name.
-    :param str destination: Transform node name.
-    :param int offset: Time offset.
-    """
-    if not cmds.objExists(source) or not cmds.objExists(destination):
-        return
-    cmds.copyKey(source)
-    delete_connected_curves(destination)
-    cmds.pasteKey(destination, option='replaceCompletely', timeOffset=offset)
-
-
-EXCLUDE_FOR_ZERO_OUT = [
-    "s", "sx", "sy", "sz", "scale", "scaleX", "scaleY", "scaleZ", "v",
-    "visibility"]
-
-
-def transfer_animation_curves(src, dst, zero_out_source=True):
-    """
-    Transfer animation curve found on source to corresponding attribute on
-    destination.
-    :param str src: Maya node name.
-    :param str dst: Maya node name.
-    :param bool zero_out_source: Zero out the source attribute
-    """
-
-    # Clean existing animation on destination.
-    delete_connected_curves(dst)
-
-    connections = [
-        c for ct in ANIMATION_CURVES_TYPES for c in
-        cmds.listConnections(src, connections=True, plugs=True, type=ct) or []]
-    outputs = [c for i, c in enumerate(connections) if i %2 == 1]
-    src_inputs = [c for i, c in enumerate(connections) if i %2 == 0]
-    dst_inputs = [dst + "." + attribute_name(input_)for input_ in src_inputs]
-
-    failures = []
-    for src_input, dst_input, output in zip(src_inputs, dst_inputs, outputs):
-        if not cmds.objExists(dst_input):
-            failures.append("\b{} ==> {}\n".format(src_input, dst_input))
-            continue
-
-        cmds.connectAttr(output, dst_input)
-        if not zero_out_source:
-            continue
-        cmds.disconnectAttr(output, src_input)
-        if attribute_name(src_input) in EXCLUDE_FOR_ZERO_OUT:
-            continue
-        cmds.setAttr(src_input, 0.0)
-
-    if failures:
-        logger.info(
-            "Impossible to transfer those attribute, "
-            "destination doesn't exists.\n" + "".join(failures))
+        mc.delete(anim_curves)

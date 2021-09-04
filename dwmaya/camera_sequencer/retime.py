@@ -4,9 +4,9 @@ related business here. This area is pymel free. The functions are only using
 the Maya node names as argument.
 """
 
-from maya import cmds
-from csmaya.core.animation.curve import ANIMATION_CURVES_TYPES, list_non_static_anim_curves
-from csmaya.core.animation.keyframe import (
+import maya.cmds as mc
+from csmaya.core.animation.curve import ANIMATION_CURVE_TYPES, list_non_static_anim_curves
+from dwmaya.animation.keyframe import (
     retime_animation_curves, hold_animation_curves, find_last_keyframe_time,
     trim_animation_curves)
 
@@ -22,16 +22,16 @@ def shift_shots(shots, offset, before=None, after=None):
     if not offset:
         return
     if before:
-        shots = [s for s in shots if cmds.getAttr(s + ".startFrame") < before]
+        shots = [s for s in shots if mc.getAttr(s + ".startFrame") < before]
     if after:
-        shots = [s for s in shots if cmds.getAttr(s + ".endFrame") > after]
+        shots = [s for s in shots if mc.getAttr(s + ".endFrame") > after]
     if offset > 0:
         shots = reversed(shots)
 
     for shot in shots:
-        start_frame = cmds.getAttr(shot + ".startFrame") + offset
-        end_frame = cmds.getAttr(shot + ".endFrame") + offset
-        cmds.shot(shot, edit=True, startTime=start_frame, endTime=end_frame)
+        start_frame = mc.getAttr(shot + ".startFrame") + offset
+        end_frame = mc.getAttr(shot + ".endFrame") + offset
+        mc.shot(shot, edit=True, startTime=start_frame, endTime=end_frame)
 
 
 def shift_shots_in_sequencer(shots, offset, before=None, after=None):
@@ -44,16 +44,16 @@ def shift_shots_in_sequencer(shots, offset, before=None, after=None):
     """
     if before:
         attr = ".sequenceStartFrame"
-        shots = [s for s in shots if cmds.getAttr(s + attr) < before]
+        shots = [s for s in shots if mc.getAttr(s + attr) < before]
     if after:
         attr = ".sequenceStartFrame"
-        shots = [s for s in shots if cmds.getAttr(s + attr) > after]
+        shots = [s for s in shots if mc.getAttr(s + attr) > after]
     if offset > 0:
         shots = reversed(shots)
 
     for shot in shots:
-        value = cmds.getAttr(shot + ".sequenceStartFrame") + offset
-        cmds.setAttr(shot + ".sequenceStartFrame", value)
+        value = mc.getAttr(shot + ".sequenceStartFrame") + offset
+        mc.setAttr(shot + ".sequenceStartFrame", value)
 
 
 def filter_locked_shots(shots):
@@ -63,7 +63,7 @@ def filter_locked_shots(shots):
     :rtype: list[str]
     :return: Maya shot nodes.
     """
-    return [s for s in shots if not cmds.shot(s, query=True, lock=True)]
+    return [s for s in shots if not mc.shot(s, query=True, lock=True)]
 
 
 def filter_shots_from_time(shots=None, time=None, sequence_time=False):
@@ -75,14 +75,14 @@ def filter_shots_from_time(shots=None, time=None, sequence_time=False):
     :rtype: list[str]
     :return: Maya shot nodes.
     """
-    time = time or cmds.currentTime(query=True)
-    shots = shots or cmds.ls(type="shot")
+    time = time or mc.currentTime(query=True)
+    shots = shots or mc.ls(type="shot")
     start_attribute = "sequenceStartFrame" if sequence_time else "startFrame"
     end_attribute = "sequenceEndFrame" if sequence_time else "endFrame"
     return [
         shot for shot in shots
-        if cmds.getAttr(shot + "." + start_attribute) < time <
-        cmds.getAttr(shot + "." + end_attribute)]
+        if mc.getAttr(shot + "." + start_attribute) < time <
+        mc.getAttr(shot + "." + end_attribute)]
 
 
 def filter_shots_from_range(
@@ -96,12 +96,12 @@ def filter_shots_from_range(
     :rtype: list[str]
     :return: Maya shot nodes.
     """
-    start_frame = start_frame or cmds.playbackOptions(min=True, query=True)
-    end_frame = end_frame or cmds.playbackOptions(max=True, query=True)
-    shots = shots or cmds.ls(type="shot")
-    return list(set(
+    start_frame = start_frame or mc.playbackOptions(min=True, query=True)
+    end_frame = end_frame or mc.playbackOptions(max=True, query=True)
+    shots = shots or mc.ls(type="shot")
+    return list({
         shot for frame in range(int(start_frame), int(end_frame))
-        for shot in filter_shots_from_time(shots, frame, sequence_time)))
+        for shot in filter_shots_from_time(shots, frame, sequence_time)})
 
 
 def retime_shot(
@@ -117,9 +117,9 @@ def retime_shot(
     :param bool scale_animation: Scale anim along the shot.
     :param bool snap_keys: Snap scaled keyframes during animation retime.
     """
-    curves = cmds.ls(type=ANIMATION_CURVES_TYPES)
-    start_frame = cmds.getAttr(shot + ".startFrame")
-    end_frame = cmds.getAttr(shot + ".endFrame")
+    curves = mc.ls(type=ANIMATION_CURVE_TYPES)
+    start_frame = mc.getAttr(shot + ".startFrame")
+    end_frame = mc.getAttr(shot + ".endFrame")
 
     if scale_animation:
         retime_animation_curves(
@@ -132,35 +132,35 @@ def retime_shot(
             offset_contiguous_animation=True,
             snap_keys=snap_keys)
 
-    sequencers = cmds.listConnections(shot, type="sequencer")
-    shots = [s for s in cmds.listConnections(sequencers, type="shot") if s != shot]
+    sequencers = mc.listConnections(shot, type="sequencer")
+    shots = [s for s in mc.listConnections(sequencers, type="shot") if s != shot]
     shots = filter_locked_shots(shots)
     # Maya automatically move shot's when two shot sequencer time ranges
     # overlaps. To avoids this issue, depend if the offset is positive or
     # negative we change the order of calls.
-    sequencer_start = cmds.getAttr(shot + ".sequenceStartFrame")
+    sequencer_start = mc.getAttr(shot + ".sequenceStartFrame")
     offset = new_start_frame - start_frame
     # Shift the shots set before the retimed one.
     if offset > 0:
-        cmds.setAttr(shot + ".startFrame", new_start_frame)
-        cmds.setAttr(shot + ".sequenceStartFrame", sequencer_start + offset)
+        mc.setAttr(shot + ".startFrame", new_start_frame)
+        mc.setAttr(shot + ".sequenceStartFrame", sequencer_start + offset)
         shift_shots(shots, offset, before=start_frame)
         shift_shots_in_sequencer(shots, offset, before=sequencer_start)
     if offset < 0:
         shift_shots_in_sequencer(shots, offset, before=sequencer_start)
         shift_shots(shots, offset, before=start_frame)
-        cmds.setAttr(shot + ".sequenceStartFrame", sequencer_start + offset)
-        cmds.setAttr(shot + ".startFrame", new_start_frame)
+        mc.setAttr(shot + ".sequenceStartFrame", sequencer_start + offset)
+        mc.setAttr(shot + ".startFrame", new_start_frame)
     # Shit the shots set after the retimed one.
     offset = new_end_frame - end_frame
     if offset < 0:
-        cmds.setAttr(shot + ".endFrame", new_end_frame)
+        mc.setAttr(shot + ".endFrame", new_end_frame)
         shift_shots_in_sequencer(shots, offset, after=sequencer_start)
         shift_shots(shots, offset, after=end_frame)
     if offset > 0:
         shift_shots_in_sequencer(shots, offset, after=sequencer_start)
         shift_shots(shots, offset, after=end_frame)
-        cmds.setAttr(shot + ".endFrame", new_end_frame)
+        mc.setAttr(shot + ".endFrame", new_end_frame)
 
 
 def retime_animation_in_shot_timerange(
@@ -183,7 +183,7 @@ def retime_animation_in_shot_timerange(
                 shots, start_frame, end_frame))
         raise ValueError(message)
 
-    curves = cmds.ls(type=ANIMATION_CURVES_TYPES)
+    curves = mc.ls(type=ANIMATION_CURVE_TYPES)
     if curves:
         retime_animation_curves(
             animation_curves=curves,
@@ -195,8 +195,8 @@ def retime_animation_in_shot_timerange(
             offset_contiguous_animation=True,
             snap_keys=snap_keys)
 
-    shot_start_frame = cmds.getAttr(shots[0] + ".startFrame")
-    shot_end_frame = cmds.getAttr(shots[0] + ".endFrame")
+    shot_start_frame = mc.getAttr(shots[0] + ".startFrame")
+    shot_end_frame = mc.getAttr(shots[0] + ".endFrame")
     new_shot_start_frame = shot_start_frame + new_start_frame - start_frame
     new_shot_end_frame = shot_end_frame + new_end_frame - end_frame
     retime_shot(
@@ -214,17 +214,17 @@ def split_shot(shot, frame, padding=0, name=None):
     :param float padding: time range to add between the split in maya timeline.
     :rtype: str representing the maya shot node created.
     """
-    start_frame = cmds.getAttr(shot + ".startFrame")
-    end_frame = cmds.getAttr(shot + ".endFrame")
+    start_frame = mc.getAttr(shot + ".startFrame")
+    end_frame = mc.getAttr(shot + ".endFrame")
     if not start_frame < frame < end_frame:
         raise ValueError("{} not in shot {}".format(frame, shot))
     # Split the shot.
-    old_sequence_end_frame = cmds.getAttr(shot + ".sequenceEndFrame")
-    cmds.setAttr(shot + ".endFrame", frame - 1)
-    sequence_end_frame = cmds.getAttr(shot + ".sequenceEndFrame")
-    new_shot = cmds.shot(
+    old_sequence_end_frame = mc.getAttr(shot + ".sequenceEndFrame")
+    mc.setAttr(shot + ".endFrame", frame - 1)
+    sequence_end_frame = mc.getAttr(shot + ".sequenceEndFrame")
+    new_shot = mc.shot(
         name,
-        shotName=cmds.getAttr(shot + ".shotName"),
+        shotName=mc.getAttr(shot + ".shotName"),
         startTime=frame + 1,
         endTime=end_frame + 1,
         sequenceStartTime=sequence_end_frame + 1,
@@ -232,10 +232,10 @@ def split_shot(shot, frame, padding=0, name=None):
     # Deal with shot padding.
     if not padding:
         return new_shot
-    curves = cmds.ls(type=ANIMATION_CURVES_TYPES)
+    curves = mc.ls(type=ANIMATION_CURVE_TYPES)
     if curves:
         hold_animation_curves(curves, frame, padding)
-    to_shift = filter_locked_shots(cmds.ls(type="shot"))
+    to_shift = filter_locked_shots(mc.ls(type="shot"))
     shift_shots(to_shift, padding, after=frame)
     return new_shot
 
@@ -260,8 +260,8 @@ def validate_frame_range(shots, start_time, end_time, sequence_time=False):
     length = end_time - start_time
     # Offset start_time to ensure it is not overlapping any shot tail.
     for shot in shots:
-        shot_start = cmds.getAttr(shot + "." + start_attribute)
-        shot_end = cmds.getAttr(shot + "." + end_attribute)
+        shot_start = mc.getAttr(shot + "." + start_attribute)
+        shot_end = mc.getAttr(shot + "." + end_attribute)
         # Ensure the time is not in the middle of a shot.
         if shot_start <= start_time <= shot_end:
             start_time = shot_end + 1
@@ -277,7 +277,7 @@ def validate_frame_range(shots, start_time, end_time, sequence_time=False):
         return start_time, end_time
     # Push back overlapping shots.
     offset = max(
-        end_time - cmds.getAttr(shot + "." + start_attribute) + 1
+        end_time - mc.getAttr(shot + "." + start_attribute) + 1
         for shot in overlapping_shots)
 
     if sequence_time:
@@ -287,7 +287,7 @@ def validate_frame_range(shots, start_time, end_time, sequence_time=False):
         return start_time, end_time
 
     shift_shots(shots, offset, after=end_time - offset)
-    curves = cmds.ls(type=ANIMATION_CURVES_TYPES)
+    curves = mc.ls(type=ANIMATION_CURVE_TYPES)
     if curves:
         hold_animation_curves(curves, end_time - offset, offset)
 
@@ -306,9 +306,9 @@ def delete_shot_and_animation(
         Remove the gap let byt the removed shot in
         the camera sequencer.
     """
-    start_frame = cmds.getAttr(shot + ".startFrame")
-    end_frame = cmds.getAttr(shot + ".endFrame")
-    sequencer_start_frame = cmds.getAttr(shot + ".sequenceStartFrame")
+    start_frame = mc.getAttr(shot + ".startFrame")
+    end_frame = mc.getAttr(shot + ".endFrame")
+    sequencer_start_frame = mc.getAttr(shot + ".sequenceStartFrame")
     # Verifiy than any other shot is sharing the same maya timeline range.
     overlapping_shots = filter_shots_from_range(start_frame=start_frame, end_frame=end_frame)
     overlapping_shots = filter_locked_shots(overlapping_shots)
@@ -318,13 +318,13 @@ def delete_shot_and_animation(
             "Impossible to trim animation from deleted shot if other shots "
             "existing on the same frame range.".format(
                 overlapping_shots, start_frame, end_frame))
-        cmds.warning(message)
+        mc.warning(message)
         trim_shot_animation = False
 
-    sequencers = cmds.listConnections(shot, type="sequencer")
-    shots = [s for s in cmds.listConnections(sequencers, type="shot") if s != shot]
+    sequencers = mc.listConnections(shot, type="sequencer")
+    shots = [s for s in mc.listConnections(sequencers, type="shot") if s != shot]
     shots = filter_locked_shots(shots)
-    cmds.delete(shot)
+    mc.delete(shot)
 
     if trim_shot_animation:
         trim_animation_curves(
