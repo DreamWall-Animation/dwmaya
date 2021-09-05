@@ -35,16 +35,15 @@ def copy_asset_lightlinking(source_namespace, target_namespace):
 def get_lightlinking_as_dict():
     lightlinking = {}
     for light in get_lights():
-        light_ll = {}
-        for shadow in [False, True]:
-            light_ll[shadow] = mc.lightlink(
-                query=True, light=light, shadow=shadow)
+        light_ll = {
+            shadow: mc.lightlink(query=True, light=light, shadow=shadow)
+            for shadow in [False, True]}
         lightlinking[light] = light_ll
     return lightlinking
 
 
 def save_lightlinking_to_json(json_path):
-    if os.path.exist(json_path):
+    if os.path.exists(json_path):
         raise Exception('json path already exists.')
     with open(json_path, 'w') as f:
         json.dump(get_lightlinking_as_dict(), f, indent=4, sort_keys=True)

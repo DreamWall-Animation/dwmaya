@@ -83,8 +83,7 @@ def filter_selection(**ls_kwargs):
         @wraps(func)
         def wrapper(*args, **kwargs):
             mc.select(mc.ls(selection=True, **ls_kwargs))
-            result = func(*args, **kwargs)
-            return result
+            return func(*args, **kwargs)
         return wrapper
     return decorator
 
@@ -125,8 +124,7 @@ def select_shape_transforms(func):
             else mc.listRelatives(n, parent=True)[0]
             for n in mc.ls(sl=True)]
         mc.select(nodes)
-        result = func(*args, **kwargs)
-        return result
+        return func(*args, **kwargs)
     return wrapper
 
 

@@ -20,8 +20,7 @@ def get_selected_shapes():
     nodes = mc.ls(selection=True)
     transforms = mc.ls(nodes, transforms=True)
     transforms_children = mc.listRelatives(transforms, children=True) or []
-    transforms_shapes = mc.ls(transforms_children, shapes=True)
-    return transforms_shapes
+    return mc.ls(transforms_children, shapes=True)
 
 
 def extend_selection_to_shapes():
@@ -71,7 +70,7 @@ def get_visible_children_shapes(node):
         if not is_visible(node):
             continue
         nodes.extend(mc.listRelatives(node, path=True, children=True) or [])
-        if not mc.nodeType(node) == 'mesh':
+        if mc.nodeType(node) != 'mesh':
             continue
         visible_meshes.append(node)
     return visible_meshes

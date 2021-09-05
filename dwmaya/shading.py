@@ -8,10 +8,7 @@ import maya.mel as mm
 
 
 def get_shading_assignments():
-    assignments = {}
-    for sg in mc.ls(type='shadingEngine'):
-        assignments[sg] = mc.sets(sg, query=True)
-    return assignments
+    return {sg: mc.sets(sg, query=True) for sg in mc.ls(type='shadingEngine')}
 
 
 def assign_material(shading_engine, objects):

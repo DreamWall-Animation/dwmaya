@@ -84,8 +84,7 @@ def find_curve_input_target_index(curve, deformer):
         if curveshapes[0] not in input_:
             continue
         target = re.findall(r"outputGeometry\[\d*\]", output)[0]
-        index = int([elt for elt in re.findall(r"\d*", target) if elt][0])
-        return index
+        return int([elt for elt in re.findall(r"\d*", target) if elt][0])
     raise Exception('input not found')
 
 

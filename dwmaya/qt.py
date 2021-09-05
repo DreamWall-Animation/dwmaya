@@ -38,10 +38,7 @@ def choice_prompt(text, title='', batch=None):
             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No),
         styleSheet=POPUP_STYLESHEET)
     prompt.setDefaultButton(QtWidgets.QMessageBox.No)
-    if prompt.exec_() == QtWidgets.QMessageBox.No:
-        return False
-    else:
-        return True
+    return prompt.exec_() != QtWidgets.QMessageBox.No
 
 
 def chose_from_list_prompt(choices, text='', position=None, buttons_height=21):
