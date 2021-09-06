@@ -103,6 +103,8 @@ def playblast(
             with occlusion_manager():
                 print('Playblasting %s.' % frames_str)
                 if generate_uvtiles_previews:
+                    # reset needed when opening + playblasting multiple scenes:
+                    mc.ogs(reset=True)
                     mm.eval('generateAllUvTilePreviews;')
                 return mc.playblast(**maya_playblast_kwargs)
 
