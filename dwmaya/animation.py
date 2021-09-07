@@ -18,6 +18,34 @@ ANIMATION_CURVE_TYPES = (
     'animCurveTA', 'animCurveTL', 'animCurveTT', 'animCurveTU')
 
 
+ANIMATION_NODE_TYPES = (
+    'animBlend',
+    'animBlendInOut',
+    'animBlendNodeAdditive',
+    'animBlendNodeAdditiveDA',
+    'animBlendNodeAdditiveDL',
+    'animBlendNodeAdditiveF',
+    'animBlendNodeAdditiveFA',
+    'animBlendNodeAdditiveFL',
+    'animBlendNodeAdditiveI16',
+    'animBlendNodeAdditiveI32',
+    'animBlendNodeAdditiveRotation',
+    'animBlendNodeAdditiveScale',
+    'animBlendNodeBoolean',
+    'animBlendNodeEnum',
+    'animBlendNodeTime',
+    'animClip',
+    'animCurveTA',
+    'animCurveTL',
+    'animCurveTT',
+    'animCurveTU',
+    'animCurveUA',
+    'animCurveUL',
+    'animCurveUT',
+    'animCurveUU',
+    'animLayer')
+
+
 def get_anim_curves():
     return mc.ls(type=ANIMATION_CURVE_TYPES)
 
@@ -220,3 +248,34 @@ def import_animation(import_path):
     for layer in mc.ls(namespace + ':*', type='animLayer'):
         mc.rename(layer, layer.split(':')[-1])
     return failed_reconnections
+
+
+def delete_animation_for_selected_references(exclude_selected_nodes=True):
+    """Delete animation on selected namespaces"""
+    selected_nodes = mc.ls(selection=True)
+    namespaces = set([n.split(':')[0] for n in selected_nodes])
+    nodes = mc.ls([n + ':*' for n in namespaces])
+    if exclude_selected_nodes:
+        nodes = list(set(nodes) - set(selected_nodes))
+    anim_nodes = []
+    connections = mc.listConnections(nodes, source=True) or []
+    anim_nodes.extend(mc.ls(connections, type=ANIMATION_NODE_TYPES))
+    if anim_nodes:
+        mc.delete(anim_nodes)
+    else:
+        mc.warning('No animation curve found.')
+
+
+def select_constraints_on_selected_references():
+    """Select constraints without namespaces on selected namespaces"""
+    selected_nodes = mc.ls(selection=True)
+    namespaces = set([n.split(':')[0] for n in selected_nodes])
+    nodes = mc.ls([n + ':*' for n in namespaces])
+    constraints = [
+        n for n in mc.listConnections(nodes) or [] if
+        'constr' in mc.nodeType(n).lower() and ':' not in n]
+    if not constraints:
+        mc.warning('Nothing to select')
+    else:
+        mc.warning('%i constraints found' % len(constraints))
+        mc.select(constraints)
