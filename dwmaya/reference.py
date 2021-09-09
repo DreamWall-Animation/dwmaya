@@ -26,6 +26,12 @@ def import_reference(refnode):
     mc.file(path, importReference=True, force=True)
 
 
+def lock_reference(ref_node, lock=True):
+    mc.file(unloadReference=ref_node, force=True)
+    mc.setAttr(ref_node + '.locked', lock)
+    mc.file(loadReference=ref_node)
+
+
 def get_reference_nodes(refnode):
     try:
         return mc.referenceQuery(refnode, nodes=True, dagPath=True)
