@@ -19,7 +19,22 @@ def get_scene_path(shortName=False):
     return path
 
 
+def open_directory(path):
+    system = platform.system()
+    if system == 'Windows':
+        if os.path.isdir(path):
+            subprocess.Popen(["explorer", os.path.normpath(path)])
+        else:
+            subprocess.Popen(["explorer", "/select,", os.path.normpath(path)])
+    else:
+        if not os.path.isdir(path):
+            path = os.path.dirname(path)
+        subprocess.Popen(['xdg-open', os.path.normpath(path)])
+
+
 def open_file_with_default_app(path):
+    if os.path.isdir(path):
+        open_directory(path)
     system = platform.system()
     if system == 'Windows':
         os.startfile(path.replace('/', '\\'))
