@@ -5,6 +5,7 @@ __license__ = 'MIT'
 
 import os
 import glob
+from contextlib import contextmanager
 
 import maya.cmds as mc
 
@@ -30,6 +31,16 @@ def lock_reference(ref_node, lock=True):
     mc.file(unloadReference=ref_node, force=True)
     mc.setAttr(ref_node + '.locked', lock)
     mc.file(loadReference=ref_node)
+
+
+@contextmanager
+def unlocked_reference_context(ref_node):
+    is_locked = mc.getAttr(ref_node + '.locked')
+    if is_locked:
+        lock_reference(ref_node, lock=False)
+    yield None
+    if is_locked:
+        lock_reference(ref_node)
 
 
 def get_reference_nodes(refnode):
