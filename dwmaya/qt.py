@@ -34,7 +34,8 @@ def warn_popup(title, text):
 def input_popup(text, value=''):
     prompt = QtWidgets.QInputDialog(
         labelText=text, styleSheet='QLabel{font: 15px;}', textValue=value)
-    return prompt.exec_()
+    prompt.exec_()
+    return prompt.textValue()
 
 
 def choice_prompt(text, title='', batch=None):
