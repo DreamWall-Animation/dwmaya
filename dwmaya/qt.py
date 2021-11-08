@@ -6,6 +6,7 @@ __license__ = 'MIT'
 import os
 import shiboken2
 from functools import partial
+from contextlib import contextmanager
 
 from PySide2 import QtWidgets, QtCore, QtGui
 
@@ -28,6 +29,12 @@ def warn_popup(title, text):
     # USD were prevented to load at scene opening before use of evalDeferred:
     cmd = partial(_warn_popup, title, text)
     mc.evalDeferred(cmd, lowestPriority=True)
+
+
+def input_popup(text, value=''):
+    prompt = QtWidgets.QInputDialog(
+        labelText=text, styleSheet='QLabel{font: 15px;}', textValue=value)
+    return prompt.exec_()
 
 
 def choice_prompt(text, title='', batch=None):
@@ -129,3 +136,12 @@ def restore_windows_positions():
         if not mc.window(window, query=True, exists=True):
             continue
         mc.window(window, edit=True, tlc=(100, 100))
+
+
+@contextmanager
+def waitcursor_ctx():
+    QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+    try:
+        yield None
+    finally:
+        QtWidgets.QApplication.restoreOverrideCursor()
