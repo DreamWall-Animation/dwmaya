@@ -17,7 +17,7 @@ import maya.OpenMaya as om
 from dwmaya.attributes import set_attr
 from dwmaya.camera import set_single_camera_renderable
 from dwmaya.viewport import (
-    DEFAULT_MODEL_EDITOR_ARGS, temp_tearoff_viewport, temp_ambient_occlusion,
+    DEFAULT_MODEL_EDITOR_KWARGS, temp_tearoff_viewport, temp_ambient_occlusion,
     dummy_context)
 
 
@@ -50,9 +50,23 @@ def get_sound_offset():
 
 
 def playblast(
-        camera, maya_playblast_kwargs, model_editor_args=None,
+        camera, maya_playblast_kwargs, model_editor_kwargs=None,
         ambient_occlusion=True, generate_uvtiles_previews=False):
-    model_editor_args = model_editor_args or dict()
+    """
+    @maya_playblast_kwargs: maya.cmds.playblast kwargs
+
+    @model_editor_kwargs: maya.cmds.modelEditor kwargs
+
+    @ambient_occlusion can be True for default settings OR it can be passed a
+        dict with the attributes values for the "hardwareRenderingGlobals" node
+            - ssaoRadius
+            - ssaoFilterRadius
+            - ssaoAmount
+            - ssaoEnable
+            - ssaoSamples
+            - multiSampleEnable
+    """
+    model_editor_kwargs = model_editor_kwargs or dict()
     try:
         start = maya_playblast_kwargs['startTime']
         end = maya_playblast_kwargs['endTime']
@@ -93,14 +107,18 @@ def playblast(
         return result
     else:
         # GUI
-        full_model_editor_args = DEFAULT_MODEL_EDITOR_ARGS.copy()
-        full_model_editor_args.update(model_editor_args)
-        if ambient_occlusion is True:
+        full_model_editor_kwargs = DEFAULT_MODEL_EDITOR_KWARGS.copy()
+        full_model_editor_kwargs.update(model_editor_kwargs)
+        if ambient_occlusion:
             occlusion_manager = temp_ambient_occlusion
+            if isinstance(ambient_occlusion, dict):
+                occlusion_settings = ambient_occlusion
+            else:
+                occlusion_settings = None
         else:
             occlusion_manager = dummy_context
-        with temp_tearoff_viewport(camera, full_model_editor_args):
-            with occlusion_manager():
+        with temp_tearoff_viewport(camera, full_model_editor_kwargs):
+            with occlusion_manager(occlusion_settings):
                 print('Playblasting %s.' % frames_str)
                 if generate_uvtiles_previews:
                     # reset needed when opening + playblasting multiple scenes:

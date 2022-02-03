@@ -13,7 +13,7 @@ from dwmaya.qt import get_screen_size
 from dwmaya.attributes import get_attr, set_attr
 
 
-DEFAULT_MODEL_EDITOR_ARGS = dict(
+DEFAULT_MODEL_EDITOR_KWARGS = dict(
     displayAppearance='smoothShaded',
     shadows=False,
     displayTextures=True,
@@ -72,13 +72,13 @@ AO_SETTINGS = dict(
 
 
 def create_tearoff_viewport(
-        camera, title=None, size=None, model_editor_args=None, position=None):
+        camera, title=None, size=None, model_editor_kwargs=None, position=None):
     tearoff_window = mc.window(title=title)
 
-    _model_editor_args = model_editor_args or dict()
-    model_editor_args = DEFAULT_MODEL_EDITOR_ARGS.copy()
-    model_editor_args.update(_model_editor_args)
-    model_editor_args['camera'] = camera
+    _model_editor_kwargs = model_editor_kwargs or dict()
+    model_editor_kwargs = DEFAULT_MODEL_EDITOR_KWARGS.copy()
+    model_editor_kwargs.update(_model_editor_kwargs)
+    model_editor_kwargs['camera'] = camera
 
     if size is None:
         try:
@@ -97,7 +97,7 @@ def create_tearoff_viewport(
     mc.timePort(height=30, snap=True)
     mc.showWindow(tearoff_window)
     editor = mc.modelPanel(panel, query=True, modelEditor=True)
-    mc.modelEditor(editor, edit=True, **model_editor_args)
+    mc.modelEditor(editor, edit=True, **model_editor_kwargs)
     mc.refresh()
     mc.modelEditor(editor, edit=True, activeView=True)
     return editor, panel, tearoff_window
@@ -109,10 +109,10 @@ def delete_tearoff_viewport(window):
 
 
 @contextmanager
-def temp_tearoff_viewport(camera, model_editor_args=None, size=None):
+def temp_tearoff_viewport(camera, model_editor_kwargs=None, size=None):
     editor, panel, window = create_tearoff_viewport(
         camera, title='%s_tearoff' % camera,
-        model_editor_args=model_editor_args)
+        model_editor_kwargs=model_editor_kwargs)
     try:
         yield editor, panel, window
     finally:
@@ -132,20 +132,20 @@ def temp_ambient_occlusion(occlusion_settings=None):
         yield None
     finally:
         # Reset VP2
-        for attr, value in AO_SETTINGS.items():
+        for attr, value in occlusion_settings.items():
             value = old_values[attr]
             set_attr(vp_node, attr, value)
 
 
 @contextmanager
-def dummy_context(arg=None):
+def dummy_context(*args, **kwargs):
     yield None
 
 
 if __name__ == '__main__':
-    model_editor_args = dict(useDefaultMaterial=True, displayLights='all')
+    model_editor_kwargs = dict(useDefaultMaterial=True, displayLights='all')
     with temp_tearoff_viewport(
-            'persp', model_editor_args=model_editor_args) as (
+            'persp', model_editor_kwargs=model_editor_kwargs) as (
             editor, panel, window):
         print(editor)
         time.sleep(1)
