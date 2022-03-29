@@ -13,14 +13,30 @@ __copyright__ = 'DreamWall'
 __license__ = 'MIT'
 
 
+from collections import OrderedDict
 import maya.cmds as mc
 import maya.mel as mm
+from PySide2 import QtWidgets, QtCore
+from dwmaya.qt import get_maya_window
 
 
+DEFAULT_SHELF = 'dwmaya_shelf_default'
+SHELVES_TO_LOAD = 'dwmaya_shelves_to_load'
 SHELF_LAYOUT = 'ShelfLayout'
 SEPARATOR = 'shelf_separator'
 LEFT_BUTTON = 1  # LMB = left mouse button
 RIGHT_BUTTON = 3  # RMB = right mouse button
+KWARGS_MATCHES = {
+    'command': 'command',
+    'double_click': 'doubleClickCommand',
+    'source_type': 'sourceType',
+    'tooltip': 'annotation',
+    'label': 'imageOverlayLabel',
+    'repeatable': 'commandRepeatable'
+}
+
+
+_shelves = OrderedDict()
 
 
 # Modified version of deleteShelfTab to delete without confirmDialog:
@@ -212,55 +228,17 @@ def create(name, shelf_buttons):
             continue
 
         # Create the shelf button
-        kwargs = dict(
-            parent=name, image=btn['icon'])
-        if 'command' in btn:
-            kwargs['command'] = btn['command']
-        if 'double_click' in btn:
-            kwargs['doubleClickCommand'] = btn['double_click']
-        if 'source_type' in btn:
-            kwargs['sourceType'] = btn['source_type']
-        if 'tooltip' in btn:
-            kwargs['annotation'] = btn['tooltip']
-        if 'label' in btn:
-            kwargs['imageOverlayLabel'] = btn['label']
-        if 'repeatable' in btn:
-            kwargs['commandRepeatable'] = btn['repeatable']
+        kwargs = dict(parent=name, image=btn['icon'])
+        for kwarg, maya_kwarg in KWARGS_MATCHES.items():
+            if kwarg in btn:
+                kwargs[maya_kwarg] = btn[kwarg]
         shelf_button = mc.shelfButton(**kwargs)
 
         # Create menu if there is one
         if 'menu' in btn:
             menu = btn['menu']
             mouse_button = btn.get('menu_button') or 3
-            if mouse_button == 1 and btn.get('command'):
-                raise ValueError(
-                    'You cannot have both a left mouse button menu and a '
-                    'shelf button command.')
-            if mouse_button == 1:
-                popup_menu = mc.popupMenu(
-                    button=1, itemArray=True, parent=shelf_button)
-                for item in menu:
-                    if item == SEPARATOR:
-                        mc.menuItem(divider=True)
-                        continue
-                    kwargs = dict(
-                        parent=popup_menu,
-                        label=item['label'],
-                        command=item['command'])
-                    if 'source_type' in item:
-                        kwargs['sourceType'] = item['source_type']
-                    mc.menuItem(**kwargs)
-            elif mouse_button == 3:
-                if SEPARATOR in menu:
-                    raise ValueError(
-                        'You cannot add separator in right button shelf menu.')
-                items = [(i['label'], i['command']) for i in menu]
-                python_items = [
-                    int(i.get('source_type') != 'mel') for i in menu]
-                mc.shelfButton(shelf_button, edit=True, menuItem=items)
-                # menuItemPython cannot be set at the same time as menuItem.
-                mc.shelfButton(
-                    shelf_button, edit=True, menuItemPython=python_items)
+            create_menu(menu, mouse_button, btn.get('command'), shelf_button)
 
     # Adapt shelves optionVar's
     shelf_index = mc.shelfTabLayout(
@@ -272,6 +250,131 @@ def create(name, shelf_buttons):
 
     # Switch to shelf
     mc.shelfTabLayout('ShelfLayout', edit=True, selectTab=name)
+
+
+def create_menu(menu, mouse_button, command, shelf_button):
+    """
+    - menu: optional. Will create a right click menu.
+        List of dict with: label, command, source_type, tooltip.
+
+    """
+    if mouse_button == 1 and command:
+        raise ValueError(
+            'You cannot have both a left mouse button menu and a '
+            'shelf button command.')
+
+    if mouse_button == 1:
+        popup_menu = mc.popupMenu(
+            button=1, itemArray=True, parent=shelf_button)
+        for item in menu:
+            if item == SEPARATOR:
+                mc.menuItem(divider=True)
+                continue
+
+            kwargs = dict(
+                parent=popup_menu,
+                label=item['label'],
+                command=item['command'])
+
+            if 'source_type' in item:
+                kwargs['sourceType'] = item['source_type']
+            mc.menuItem(**kwargs)
+
+    elif mouse_button == 3:
+        if SEPARATOR in menu:
+            msg = 'You cannot add separator in right button shelf menu.'
+            raise ValueError(msg)
+        items = [(i['label'], i['command']) for i in menu]
+        python_items = [int(i.get('source_type') != 'mel') for i in menu]
+        mc.shelfButton(shelf_button, edit=True, menuItem=items)
+        # menuItemPython cannot be set at the same time as menuItem.
+        mc.shelfButton(shelf_button, edit=True, menuItemPython=python_items)
+
+
+def register(name, shelf):
+    _shelves[name] = shelf
+
+
+def update():
+    if mc.optionVar(exists=SHELVES_TO_LOAD):
+        shelves_to_load = mc.optionVar(query=SHELVES_TO_LOAD).split(',')
+    else:
+        shelves_to_load = None
+
+    for name, shelf in _shelves.items():
+        if shelves_to_load is None or name in shelves_to_load:
+            create(name, shelf)
+        else:
+            delete(name)
+
+    if mc.optionVar(exists=DEFAULT_SHELF):
+        set_current_tab(mc.optionVar(query=DEFAULT_SHELF))
+
+
+class ShelfUi(QtWidgets.QWidget):
+    def __init__(self, parent=None):
+        super(ShelfUi, self).__init__(parent, QtCore.Qt.Tool)
+        self.setWindowTitle('Shelf Manager')
+        self.checkboxes = []
+        self.radiobuttons = []
+        self.buttongroup = QtWidgets.QButtonGroup()
+        self.buttongroup.buttonReleased.connect(self.value_changed)
+
+        self.items_layout = QtWidgets.QGridLayout()
+        self.items_layout.addWidget(QtWidgets.QLabel('Default'), 0, 0)
+        self.items_layout.addWidget(QtWidgets.QLabel('Loaded'), 0, 1)
+        self.items_layout.addWidget(QtWidgets.QLabel('Shelf'), 0, 2)
+
+        for i, name in enumerate(_shelves.keys()):
+            radio = QtWidgets.QRadioButton('')
+            checkbox = QtWidgets.QCheckBox('')
+            checkbox.released.connect(self.value_changed)
+            self.radiobuttons.append(radio)
+            self.checkboxes.append(checkbox)
+            self.buttongroup.addButton(radio, i)
+            self.items_layout.addWidget(radio, i + 1, 0)
+            self.items_layout.addWidget(checkbox, i + 1, 1)
+            self.items_layout.addWidget(QtWidgets.QLabel(name), i + 1, 2)
+
+        self.layout = QtWidgets.QHBoxLayout(self)
+        self.layout.addLayout(self.items_layout)
+        self.set_ui_states()
+
+    def set_ui_states(self):
+        if mc.optionVar(exists=DEFAULT_SHELF):
+            default = mc.optionVar(query=DEFAULT_SHELF)
+            try:
+                index = [str(k) for k in _shelves.keys()].index(default)
+                self.buttongroup.button(index).setChecked(True)
+            except ValueError:
+                msg = 'Default shelf: "{}" is not registered'.format(default)
+                mc.warning(msg)
+                mc.optionVar(remove=DEFAULT_SHELF)
+        if mc.optionVar(exists=SHELVES_TO_LOAD):
+            shelves_to_load = mc.optionVar(query=SHELVES_TO_LOAD).split(',')
+            for i, name in enumerate(_shelves):
+                if name in shelves_to_load:
+                    self.checkboxes[i].setChecked(True)
+
+    def value_changed(self, *_):
+        shelves_to_load = []
+        for i, name in enumerate(_shelves.keys()):
+            if self.buttongroup.checkedId() == i:
+                mc.optionVar(stringValue=[DEFAULT_SHELF, name])
+            if self.checkboxes[i].isChecked():
+                shelves_to_load.append(name)
+        mc.optionVar(stringValue=[SHELVES_TO_LOAD, ','.join(shelves_to_load)])
+        update()
+
+
+_shelf_ui = None
+
+
+def show_shelf_ui():
+    global _shelf_ui
+    if _shelf_ui is None:
+        _shelf_ui = ShelfUi(parent=get_maya_window())
+    _shelf_ui.show()
 
 
 if __name__ == '__main__':
