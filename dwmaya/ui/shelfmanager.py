@@ -2,7 +2,7 @@
 Ui to manage custom shelves registered.
 """
 
-__author__ = 'Olivier Evers', 'Lionel Brouyère'
+__author__ = 'Olivier Evers', 'Lionel Brouyere'
 __copyright__ = 'DreamWall'
 __license__ = 'MIT'
 
