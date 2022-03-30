@@ -9,7 +9,7 @@ from contextlib import contextmanager
 
 import maya.cmds as mc
 
-from dwmaya.qt import get_screen_size
+from dwmaya.ui.qt import get_screen_size
 from dwmaya.attributes import get_attr, set_attr
 
 

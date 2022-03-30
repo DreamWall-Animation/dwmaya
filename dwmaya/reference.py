@@ -10,7 +10,7 @@ from contextlib import contextmanager
 import maya.cmds as mc
 
 from dwmaya.hierarchy import get_closest_to_root
-from dwmaya.qt import chose_from_list_prompt
+from dwmaya.ui.qt import chose_from_list_prompt
 
 
 def add_reference(path, namespace, group=None):
