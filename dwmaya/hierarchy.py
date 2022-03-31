@@ -65,16 +65,16 @@ def is_visible(node):
 
 def get_visible_children_shapes(node):
     nodes = mc.listRelatives(node, path=True, children=True) or []
-    visible_meshes = []
+    visible_shapes = []
     while nodes:
         node = nodes.pop()
         if not is_visible(node):
             continue
         nodes.extend(mc.listRelatives(node, path=True, children=True) or [])
-        if not mc.nodeType(node) == 'mesh':
+        if not mc.ls(node, shapes=True):
             continue
-        visible_meshes.append(node)
-    return visible_meshes
+        visible_shapes.append(node)
+    return visible_shapes
 
 
 def remove_overlapping_nodes(nodes):
