@@ -9,6 +9,7 @@ import glob
 import shutil
 import tempfile
 import subprocess
+from contextlib import nested
 
 import maya.cmds as mc
 import maya.mel as mm
@@ -51,7 +52,8 @@ def get_sound_offset():
 
 def playblast(
         camera, maya_playblast_kwargs, model_editor_kwargs=None,
-        ambient_occlusion=True, generate_uvtiles_previews=False):
+        ambient_occlusion=True, generate_uvtiles_previews=False,
+        context_managers=None):
     """
     @maya_playblast_kwargs: maya.cmds.playblast kwargs
 
@@ -107,24 +109,27 @@ def playblast(
         return result
     else:
         # GUI
+        context_managers = context_managers or []
+
         full_model_editor_kwargs = DEFAULT_MODEL_EDITOR_KWARGS.copy()
         full_model_editor_kwargs.update(model_editor_kwargs)
+        context_managers.append(
+            temp_tearoff_viewport(camera, full_model_editor_kwargs))
+
         if ambient_occlusion:
-            occlusion_manager = temp_ambient_occlusion
             if isinstance(ambient_occlusion, dict):
                 occlusion_settings = ambient_occlusion
             else:
                 occlusion_settings = None
-        else:
-            occlusion_manager = dummy_context
-        with temp_tearoff_viewport(camera, full_model_editor_kwargs):
-            with occlusion_manager(occlusion_settings):
-                print('Playblasting %s.' % frames_str)
-                if generate_uvtiles_previews:
-                    # reset needed when opening + playblasting multiple scenes:
-                    mc.ogs(reset=True)
-                    mm.eval('generateAllUvTilePreviews;')
-                return mc.playblast(**maya_playblast_kwargs)
+            context_managers.append(temp_ambient_occlusion(occlusion_settings))
+
+        with nested(*context_managers):
+            print('Playblasting %s.' % frames_str)
+            if generate_uvtiles_previews:
+                # reset needed when opening + playblasting multiple scenes:
+                mc.ogs(reset=True)
+                mm.eval('generateAllUvTilePreviews;')
+            return mc.playblast(**maya_playblast_kwargs)
 
 
 def _preroll_postroll_checker(
