@@ -3,8 +3,19 @@ __copyright__ = 'DreamWall'
 __license__ = 'MIT'
 
 
+import itertools
 import maya.cmds as mc
 import pymel.core as pm
+
+
+def lock_xform(node, keyable=None):
+    tsr = ('t', 's', 'r')
+    xyz = ('x', 'y', 'z')
+    for op, axe in itertools.product(tsr, xyz):
+        if keyable is not None:
+            mc.setAttr(node + '.' + op + axe, keyable=keyable)
+        lock_attr(node, op + axe)
+        mc.setAttr(node + '.' + op + axe, lock=True)
 
 
 def get_attr(node, attr):
