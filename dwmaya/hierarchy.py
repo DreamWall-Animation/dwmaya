@@ -43,6 +43,14 @@ def get_parents(nodes, sep='|'):
     return parents
 
 
+def find_root(node):
+    parent = mc.listRelatives(node, parent=True)
+    while parent:
+        node = parent
+        parent = mc.listRelatives(node, parent=True)
+    return node
+
+
 def is_parent_of(parent, node):
     if not parent:
         raise Exception('"parent" arg is mandatory.')
