@@ -5,8 +5,8 @@ the Maya node names as argument.
 """
 
 from maya import cmds
-from csmaya.core.animation.curve import ANIMATION_CURVES_TYPES, list_non_static_anim_curves
-from csmaya.core.animation.keyframe import (
+from dwmaya.__curve import ANIMATION_CURVES_TYPES, list_non_static_anim_curves
+from dwmaya.__keyframe import (
     retime_animation_curves, hold_animation_curves, find_last_keyframe_time,
     trim_animation_curves)
 

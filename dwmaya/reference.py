@@ -64,6 +64,22 @@ def get_reference_root_nodes(reference_node):
     return get_closest_to_root(get_reference_nodes(reference_node))
 
 
+def list_child_reference_nodes(parent):
+    """
+    @parent -> str: transform node name.
+    return List[str]: reference nodes
+    """
+    children = mc.listRelatives(parent, allDescendents=True) or []
+    return list_associated_reference_nodes(children)
+
+
+def list_associated_reference_nodes(nodes):
+    return list({
+        mc.referenceQuery(node, referenceNode=True)
+        for node in nodes if
+        mc.referenceQuery(node, isNodeReferenced=True)})
+
+
 def get_references():
     refs = []
     for ref in mc.ls(type="reference"):
