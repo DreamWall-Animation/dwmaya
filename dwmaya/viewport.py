@@ -137,11 +137,6 @@ def temp_ambient_occlusion(occlusion_settings=None):
             set_attr(vp_node, attr, value)
 
 
-@contextmanager
-def dummy_context(*args, **kwargs):
-    yield None
-
-
 if __name__ == '__main__':
     model_editor_kwargs = dict(useDefaultMaterial=True, displayLights='all')
     with temp_tearoff_viewport(

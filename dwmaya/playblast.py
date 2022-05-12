@@ -18,8 +18,7 @@ import maya.OpenMaya as om
 from dwmaya.attributes import set_attr
 from dwmaya.camera import set_single_camera_renderable
 from dwmaya.viewport import (
-    DEFAULT_MODEL_EDITOR_KWARGS, temp_tearoff_viewport, temp_ambient_occlusion,
-    dummy_context)
+    DEFAULT_MODEL_EDITOR_KWARGS, temp_tearoff_viewport, temp_ambient_occlusion)
 
 
 def get_sound_node():
