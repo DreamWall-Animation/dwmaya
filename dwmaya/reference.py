@@ -13,10 +13,23 @@ from dwmaya.hierarchy import get_closest_to_root
 from dwmaya.ui.qt import chose_from_list_prompt
 
 
-def add_reference(path, namespace, group=None):
-    mc.file(
-        path, reference=True, prompt=False, namespace=namespace,
-        groupReference=bool(group), groupName=group)
+def add_reference(path, namespace, group=None, parent=None):
+    if parent and not group:
+        tmp = 'randomnameimpossibletoneverappendthatscrazyblabla'
+        nodes = mc.file(
+            path, reference=True, prompt=False, namespace=namespace,
+            groupReference=True, groupName=tmp, returnNewNodes=True)
+        ref_content = mc.listRelatives(tmp)
+        if ref_content:
+            mc.parent(ref_content, parent)
+        mc.delete(tmp)
+
+    else:
+        nodes = mc.file(
+            path, reference=True, prompt=False, namespace=namespace,
+            groupReference=bool(group), groupName=group, returnNewNodes=True)
+
+    return mc.ls(nodes, type='reference')
 
 
 def unload_reference(reference_node, force=True):

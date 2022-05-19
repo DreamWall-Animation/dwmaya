@@ -18,6 +18,18 @@ def lock_xform(node, keyable=None):
         mc.setAttr(node + '.' + op + axe, lock=True)
 
 
+def connect_attr(source, destination):
+    node, attr = destination.split('.')
+    if mc.attributeQuery(attr, node=node, multi=True):
+        i = 0
+        sub_destination = '{}[{}]'.format(destination, i)
+        while mc.listConnections(sub_destination):
+            sub_destination = '{}[{}]'.format(destination, i)
+            i += 1
+        destination = sub_destination
+    mc.connectAttr(source, destination)
+
+
 def get_attr(node, attr):
     return mc.getAttr('%s.%s' % (node, attr))
 
