@@ -1,4 +1,5 @@
 
+import tempfile
 from contextlib import contextmanager
 import maya.cmds as mc
 
@@ -15,3 +16,11 @@ def unlocked_nodes(nodes):
     finally:
         for state, node in zip(states, nodes):
             mc.lockNode(node, lock=state)
+
+
+def temporary_nodename(namespace=None):
+    name = next(tempfile._get_candidate_names())
+    namespace = namespace.strip(':') + ':' if namespace else ''
+    while mc.objExists(namespace + name) or mc.objExists(name):
+        name = next(tempfile._get_candidate_names())
+    return name

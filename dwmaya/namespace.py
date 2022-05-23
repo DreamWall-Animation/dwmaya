@@ -5,6 +5,7 @@ __license__ = 'MIT'
 
 import re
 from contextlib import contextmanager
+
 import maya.cmds as mc
 
 

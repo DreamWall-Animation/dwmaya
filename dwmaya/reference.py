@@ -10,12 +10,13 @@ from contextlib import contextmanager
 import maya.cmds as mc
 
 from dwmaya.hierarchy import get_closest_to_root
+from dwmaya.node import temporary_nodename
 from dwmaya.ui.qt import chose_from_list_prompt
 
 
 def add_reference(path, namespace, group=None, parent=None):
     if parent and not group:
-        tmp = 'randomnameimpossibletoneverappendthatscrazyblabla'
+        tmp = temporary_nodename(namespace)
         nodes = mc.file(
             path, reference=True, prompt=False, namespace=namespace,
             groupReference=True, groupName=tmp, returnNewNodes=True)
