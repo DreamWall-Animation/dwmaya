@@ -14,12 +14,13 @@ from dwmaya.node import temporary_nodename
 from dwmaya.ui.qt import chose_from_list_prompt
 
 
-def add_reference(path, namespace, group=None, parent=None):
+def add_reference(path, namespace, group=None, parent=None, merge=False):
     if parent and not group:
         tmp = temporary_nodename(namespace)
         nodes = mc.file(
             path, reference=True, prompt=False, namespace=namespace,
-            groupReference=True, groupName=tmp, returnNewNodes=True)
+            groupReference=True, groupName=tmp, returnNewNodes=True,
+            mergeNamespacesOnClash=merge)
         ref_content = mc.listRelatives(tmp)
         if ref_content:
             mc.parent(ref_content, parent)
