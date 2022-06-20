@@ -114,6 +114,17 @@ def temp_DG_evaluation():
         mc.evaluationManager(mode=initial_mode)
 
 
+def toggle_parallel_evaluation():
+    current_mode = mc.evaluationManager(query=True, mode=True)[0]
+    if current_mode == 'off':
+        new_name = new_mode = 'parallel'
+    else:
+        new_mode = 'off'
+        new_name = 'DG'
+    mc.warning('Switched evaluation manager to "%s"' % new_name.upper())
+    mc.evaluationManager(mode=new_mode)
+
+
 def get_selected_curves():
     return mc.keyframe(query=True, selected=True, name=True)
 
