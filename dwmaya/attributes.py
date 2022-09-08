@@ -5,7 +5,6 @@ __license__ = 'MIT'
 
 import itertools
 import maya.cmds as mc
-import pymel.core as pm
 
 
 def lock_xform(node, keyable=None):
@@ -56,6 +55,7 @@ def unlock_attr(node, attr):
 
 
 def set_default_attribute_value(node, attr):
+    import pymel.core as pm
     default_value = mc.attributeQuery(attr, node=node, listDefault=True)[0]
     pm.Attribute('%s.%s' % (node, attr)).set(default_value)
 
