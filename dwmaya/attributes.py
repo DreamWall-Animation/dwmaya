@@ -41,7 +41,7 @@ def set_attr(node, attr, value, skip_locked_connected=False):
             return
     if isinstance(value, list):
         mc.setAttr(attribute, *value)
-    elif isinstance(value, basestring):
+    elif isinstance(value, str):
         mc.setAttr(attribute, value, type='string')
     else:
         mc.setAttr(attribute, value)
@@ -71,3 +71,8 @@ def reset_animation_attributes(node):
 
 def get_path_attributes(node):
     return mc.listAttr(node, usedAsFilename=True) or []
+
+
+def attribute_name(node):
+    node, *attributes = node.split('.')
+    return '.'.join(attributes)

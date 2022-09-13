@@ -113,7 +113,7 @@ def get_maya_window():
         return None
     ptr = omui.MQtUtil.mainWindow()
     if ptr is not None:
-        return shiboken2.wrapInstance(long(ptr), QtWidgets.QWidget)
+        return shiboken2.wrapInstance(int(ptr), QtWidgets.QWidget)
 
 
 def get_screen_size():

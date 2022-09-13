@@ -84,7 +84,8 @@ def list_child_reference_nodes(parent):
     @parent -> str: transform node name.
     return List[str]: reference nodes
     """
-    children = mc.listRelatives(parent, allDescendents=True) or []
+    children = mc.listRelatives(
+        parent, allDescendents=True, fullPath=True) or []
     return list_associated_reference_nodes(children)
 
 
