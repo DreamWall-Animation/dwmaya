@@ -4,6 +4,9 @@ from dwmaya.plugins import ensure_plugin_loaded
 
 @ensure_plugin_loaded('AbcExport')
 def export_nodes_to_alembic(start, end, roots, filepath, frame_sample=1):
+    # Seems that alembic command does not support windows path like. Need to
+    # ensure the path is unix.
+    filepath = filepath.replace('\\', '/')
     roots = ' '.join([f'-root {root}' for root in roots])
     command = (
         f'AbcExport -j "-frameRange {start} {end}'
