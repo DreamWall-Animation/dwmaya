@@ -2,7 +2,7 @@ __author__ = 'Olivier Evers'
 __copyright__ = 'DreamWall'
 __license__ = 'MIT'
 
-
+from contextlib import contextmanager
 import maya.cmds as mc
 
 
@@ -105,3 +105,25 @@ def get_closest_to_root(nodes):
     nodes = sorted(nodes, key=lambda n: n.count('|'))
     roots_pipes_count = nodes[0].count('|')
     return [n for n in nodes if n.count('|') == roots_pipes_count]
+
+
+@contextmanager
+def temporarily_reparent_transform_children(transform, parent=None):
+    """
+    Set the children of a node to scene root.
+    usage:
+    with temporarily_extracted_node_children(node) as content:
+        mc.select(content)
+        mc.file(exportSelected=True)
+    """
+    try:
+        content = mc.listRelatives(transform)
+        if parent is not None:
+            mc.parent(content, parent)
+            result = parent
+        else:
+            result = mc.parent(content, world=True)
+        yield result
+
+    finally:
+        mc.parent(content, transform)
