@@ -117,13 +117,12 @@ def temporarily_reparent_transform_children(transform, parent=None):
         mc.file(exportSelected=True)
     """
     try:
-        content = mc.listRelatives(transform)
+        content = mc.listRelatives(transform, fullPath=True)
         if parent is not None:
-            mc.parent(content, parent)
-            result = parent
+            result = mc.parent(content, parent)
         else:
             result = mc.parent(content, world=True)
         yield result
 
     finally:
-        mc.parent(content, transform)
+        mc.parent(result, transform)
