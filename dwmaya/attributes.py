@@ -5,6 +5,7 @@ __license__ = 'MIT'
 
 import itertools
 import maya.cmds as mc
+from contextlib import contextmanager
 
 
 def lock_xform(node, keyable=None):
@@ -76,3 +77,16 @@ def get_path_attributes(node):
 def attribute_name(node):
     node, *attributes = node.split('.')
     return '.'.join(attributes)
+
+
+@contextmanager
+def temporarily_unlocked_attributes(node, attributes):
+    try:
+        states = {a: mc.getAttr(f'{node}.{a}', lock=True) for a in attributes}
+        for attribute in attributes:
+            mc.setAttr(f'{node}.{attribute}', lock=False)
+        yield
+
+    finally:
+        for attribute, state in states.items():
+            mc.setAttr(f'{node}.{attribute}', lock=state)
