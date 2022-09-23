@@ -146,3 +146,42 @@ def waitcursor_ctx():
         yield None
     finally:
         QtWidgets.QApplication.restoreOverrideCursor()
+
+
+STATIC_TEXT_TPL = (
+    '<div style="font-size: {size}pt; color: #858585"><b>No Image</b></div>')
+
+
+def no_image_pixmap(size):
+    try:
+        pixmap = QtGui.QPixmap(*size)
+        painter = QtGui.QPainter(pixmap)
+        pixmap.fill(QtGui.QColor(30, 30, 30, 255))
+
+        pen = QtGui.QPen(QtGui.QColor(50, 50, 50, 255))
+        painter.setPen(pen)
+        offset_x, offset_y = size[0] / 10, size[1] / 10
+
+        painter.drawLine(
+            offset_x, offset_y, size[0] - offset_x, size[1] - offset_y)
+        painter.drawLine(
+            size[0] - offset_x, offset_y, offset_x, size[1] - offset_y)
+
+        tsize = int(min([size[0] / size[1], size[1] / size[0]]) * 18)
+        text = STATIC_TEXT_TPL.format(size=tsize)
+        statictext = QtGui.QStaticText(text)
+        x = (size[0] / 2) - (statictext.size().width() / 2)
+        y = (size[1] / 2) - (statictext.size().height() / 2)
+
+        painter.setPen(QtCore.Qt.transparent)
+        painter.setBrush(QtGui.QColor(30, 30, 30, 255))
+        painter.drawRect(
+            int(size[0] / 2 - statictext.size().width() / 2),
+            int(size[1] / 2 - statictext.size().height() / 2),
+            statictext.size().width(),
+            statictext.size().height())
+
+        painter.drawStaticText(int(x), int(y), statictext)
+    finally:
+        painter.end()
+    return pixmap
