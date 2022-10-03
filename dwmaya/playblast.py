@@ -9,7 +9,18 @@ import glob
 import shutil
 import tempfile
 import subprocess
-from contextlib import nested
+try:
+    from contextlib import nested
+except ImportError:
+    from contextlib import ExitStack, contextmanager
+
+    @contextmanager
+    def nested(*contexts):
+        with ExitStack() as stack:
+            for ctx in contexts:
+                stack.enter_context(ctx)
+            yield contexts
+
 
 import maya.cmds as mc
 import maya.mel as mm
