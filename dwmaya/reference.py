@@ -21,7 +21,7 @@ def add_reference(path, namespace, group=None, parent=None, merge=False):
             path, reference=True, prompt=False, namespace=namespace,
             groupReference=True, groupName=tmp, returnNewNodes=True,
             mergeNamespacesOnClash=merge)
-        ref_content = mc.listRelatives(tmp)
+        ref_content = mc.listRelatives(tmp, fullPath=True)
         if ref_content:
             mc.parent(ref_content, parent)
         mc.delete(tmp)
