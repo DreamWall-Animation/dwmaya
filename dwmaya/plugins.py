@@ -10,9 +10,11 @@ def load_plugin(plugin_name):
     mc.loadPlugin(plugin_name, quiet=True)
 
 
-def remove_autoloads():
+def remove_autoloads(excludes=None):
+    if excludes is None:
+        excludes = ['autoLoader']
     for plugin in mc.pluginInfo(query=True, listPluginsPath=True):
-        if 'autoLoader' in plugin:
+        if plugin in excludes:
             continue
         mc.pluginInfo(plugin, edit=True, autoload=False)
     mc.pluginInfo(savePluginPrefs=True)
