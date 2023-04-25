@@ -6,6 +6,7 @@ __license__ = 'MIT'
 import re
 import maya.cmds as mc
 import maya.api.OpenMaya as om2
+import maya.OpenMaya as om
 
 
 FINALING_MESH_NAME = '{transform}_finaling_copy_{id}'
@@ -158,3 +159,29 @@ def is_faces_from_unique_mesh(faces):
     if not faces:
         return False
     return len(set([face.split('.')[-2] for face in faces])) == 1
+
+
+def mesh_has_ngones(mesh):
+    selection_list = om.MSelectionList()
+    selection_list.add(mesh)
+    dagpath = om.MDagPath()
+    selection_list.getDagPath(0, dagpath)
+
+    meshIt = om.MItMeshPolygon(dagpath)
+    while not meshIt.isDone:
+        if meshIt.polygonVertexCount > 4:
+            return True
+        meshIt.next()
+
+
+def mesh_has_triangle(mesh):
+    selection_list = om.MSelectionList()
+    selection_list.add(mesh)
+    dagpath = om.MDagPath()
+    selection_list.getDagPath(0, dagpath)
+
+    meshIt = om.MItMeshPolygon(dagpath)
+    while not meshIt.isDone:
+        if meshIt.polygonVertexCount < 4:
+            return True
+        meshIt.next()
