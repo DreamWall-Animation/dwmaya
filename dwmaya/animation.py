@@ -216,6 +216,16 @@ def transfer_animation_curves(src, dst, zero_out_source=True):
             "destination doesn't exists.\n" + "".join(failures))
 
 
+def list_connected_curves(node):
+    curves = []
+    for type_ in ANIMATION_CURVE_TYPES:
+        curves.extend(list({
+            curve.split(".")[0] for curve in
+            mc.listConnections(node, type=type_, plugs=True, source=True)
+            or []}))
+    return curves
+
+
 def delete_connected_curves(node):
     """
     delete animation curves connected to given node.
