@@ -31,7 +31,8 @@ KWARGS_MATCHES = {
     'source_type': 'sourceType',
     'tooltip': 'annotation',
     'label': 'imageOverlayLabel',
-    'repeatable': 'commandRepeatable'
+    'repeatable': 'commandRepeatable',
+    'color': 'backgroundColor'
 }
 
 
