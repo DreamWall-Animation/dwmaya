@@ -32,4 +32,6 @@ def launch_mayapy_script(
     return subprocess.Popen(
         [mayapypath or 'mayapy', scriptpath] + arguments,
         env=environment,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
         bufsize=-1)

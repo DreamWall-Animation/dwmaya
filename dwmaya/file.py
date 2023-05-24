@@ -1,4 +1,8 @@
-
+import os
+import re
+import shutil
+import codecs
+import tempfile
 import maya.cmds as mc
 from dwmaya.hierarchy import temporarily_reparent_transform_children
 from dwmaya.node import temporary_nodename
@@ -64,3 +68,29 @@ def export_node_content(
 
     if parent:
         mc.delete(parent)
+
+
+def detect_filepaths_in_maya_file(maya_file_path, root):
+    pattern = rf'"{ root}(.*?)"'
+    detected = []
+    with codecs.open(maya_file_path, 'r', encoding='iso-8859-1') as mayascii:
+        for line in mayascii:
+            detected.extend(root + m for m in re.findall(pattern, line))
+    return detected
+
+
+def switch_filepaths_in_maya_file(
+        maya_file_path, sources_destinations, overwrite_file=False):
+    filename = os.path.basename(maya_file_path)
+    directory = tempfile.gettempdir()
+    clean = f'{directory}/{os.path.splitext(filename)[0]}_clean.ma'
+    with open(clean, 'w') as f:
+        with codecs.open(maya_file_path, 'r', encoding='iso-8859-1') as mayascii:
+            for line in mayascii:
+                for source, destination in sources_destinations:
+                    line = line.replace(source, destination)
+                f.write(line)
+    if not overwrite_file:
+        return clean
+    shutil.copy(clean, maya_file_path)
+    return maya_file_path
