@@ -11,7 +11,8 @@ import maya.cmds as mc
 
 from dwmaya.hierarchy import get_closest_to_root
 from dwmaya.node import temporary_nodename
-from dwmaya.ui.qt import chose_from_list_prompt
+if not mc.about(batch=True):
+    from dwmaya.ui.qt import chose_from_list_prompt
 
 
 def add_reference(path, namespace, group=None, parent=None, merge=False):
