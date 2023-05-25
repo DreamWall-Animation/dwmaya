@@ -168,10 +168,11 @@ def mesh_has_ngones(mesh):
     selection_list.getDagPath(0, dagpath)
 
     meshIt = om.MItMeshPolygon(dagpath)
-    while not meshIt.isDone:
-        if meshIt.polygonVertexCount > 4:
+    while not meshIt.isDone():
+        if meshIt.polygonVertexCount() > 4:
             return True
         meshIt.next()
+    return False
 
 
 def mesh_has_triangle(mesh):
@@ -181,7 +182,8 @@ def mesh_has_triangle(mesh):
     selection_list.getDagPath(0, dagpath)
 
     meshIt = om.MItMeshPolygon(dagpath)
-    while not meshIt.isDone:
-        if meshIt.polygonVertexCount < 4:
+    while not meshIt.isDone():
+        if meshIt.polygonVertexCount() < 4:
             return True
         meshIt.next()
+    return False
