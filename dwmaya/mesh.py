@@ -187,3 +187,18 @@ def mesh_has_triangle(mesh):
             return True
         meshIt.next()
     return False
+
+
+def detect_triangles(mesh):
+    selection_list = om.MSelectionList()
+    selection_list.add(mesh)
+    dagpath = om.MDagPath()
+    selection_list.getDagPath(0, dagpath)
+
+    poly_it = om.MItMeshPolygon(dagpath)
+    triangles = []
+    while not poly_it.isDone():
+        if poly_it.polygonVertexCount() < 4:
+            return triangles.append(poly_it.index())
+        poly_it.next()
+    return triangles
