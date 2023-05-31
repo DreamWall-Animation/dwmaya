@@ -116,6 +116,13 @@ def get_maya_window():
         return shiboken2.wrapInstance(int(ptr), QtWidgets.QWidget)
 
 
+def center_on_maya_window(widget):
+    offset_x = widget.rect().width() / 2
+    offset_y = widget.rect().height() / 2
+    center = get_maya_window().rect().center()
+    widget.move(center.x() - offset_x, center.y() - offset_y)
+
+
 def get_screen_size():
     rect = QtWidgets.QDesktopWidget().screenGeometry(-1)
     scale = 96 / QtWidgets.QApplication.primaryScreen().logicalDotsPerInch()
