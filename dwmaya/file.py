@@ -13,19 +13,22 @@ def import_maya_file(filepath, parent=None, namespace=None):
 
     tmp = temporary_nodename(namespace)
     if namespace:
-        mc.file(
+        content = mc.file(
             filepath, i=True, prompt=False, groupReference=True, groupName=tmp,
             returnNewNodes=True, namespace=namespace)
     else:
-        mc.file(
+        content = mc.file(
             filepath, i=True, prompt=False, groupReference=True, groupName=tmp,
             returnNewNodes=True)
 
-    ref_content = mc.listRelatives(tmp, fullPath=True)
-    if ref_content and parent:
-        mc.parent(ref_content, parent)
-    mc.delete(tmp)
-    return parent
+    if mc.objExists(tmp):
+        ref_content = mc.listRelatives(tmp, fullPath=True)
+        if ref_content and parent:
+            mc.parent(ref_content, parent)
+        mc.delete(tmp)
+
+    non_dag = list(set(content) - set(mc.ls(content, dagObjects=True)))
+    return parent, non_dag
 
 
 def preserve_maya_scenename(func):
@@ -45,7 +48,8 @@ def preserve_maya_scenename(func):
 @preserve_selection
 @preserve_maya_scenename
 def export_node_content(
-        node, filepath, binary=False, parent_name=None, force=True):
+        node, filepath, binary=False, parent_name=None, force=True,
+        additional_non_dag_nodes=None):
     """
     Export a node content in given filepath.
     node -> str: transform node name to extract content.
@@ -61,6 +65,8 @@ def export_node_content(
         parent = None
 
     with temporarily_reparent_transform_children(node, parent) as content:
+        if additional_non_dag_nodes:
+            content.extend(additional_non_dag_nodes)
         mc.select(content)
         type_ = 'mayaBinary' if binary else 'mayaAscii'
         filepath = mc.file(

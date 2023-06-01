@@ -118,11 +118,14 @@ def temporarily_reparent_transform_children(transform, parent=None):
     """
     try:
         content = mc.listRelatives(transform, fullPath=True)
-        if parent is not None:
+        if not content:
+            result = []
+        elif parent is not None:
             result = mc.parent(content, parent)
         else:
             result = mc.parent(content, world=True)
-        yield result
+        yield result[:]
 
     finally:
-        mc.parent(result, transform)
+        if result:
+            mc.parent(result, transform)
