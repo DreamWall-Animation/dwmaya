@@ -300,9 +300,19 @@ def temp_DG_evaluation():
     initial_mode = mc.evaluationManager(query=True, mode=True)[0]
     mc.evaluationManager(mode='off')
     try:
-        yield None
+        yield
     finally:
         mc.evaluationManager(mode=initial_mode)
+
+
+@contextmanager
+def temp_autokey_off():
+    initial_mode = mc.autoKeyframe(query=True, state=True)
+    mc.autoKeyframe(state=False)
+    try:
+        yield
+    finally:
+        mc.autoKeyframe(state=initial_mode)
 
 
 def toggle_parallel_evaluation():
