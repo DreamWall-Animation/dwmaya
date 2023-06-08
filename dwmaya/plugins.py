@@ -49,6 +49,11 @@ def find_nodetype_plugin(node_type):
             return plugin
 
 
+def list_plugin_nodes(plugin_name):
+    node_types = mc.pluginInfo(plugin_name, query=True, dependNode=True)
+    return mc.ls(type=node_types)
+
+
 def ensure_plugin_loaded(*plugin_names):
     """
     Decorator which ensure the given plugins are
