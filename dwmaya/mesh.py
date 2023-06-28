@@ -202,3 +202,14 @@ def detect_triangles(mesh):
             return triangles.append(poly_it.index())
         poly_it.next()
     return triangles
+
+
+def freeze_mesh_vertices(mesh):
+    selection_list = om.MSelectionList()
+    selection_list.add(mesh)
+    dagpath = om.MDagPath()
+    selection_list.getDagPath(0, dagpath)
+    vertex_it = om.MItMeshVertex(dagpath)
+    while not vertex_it.isDone():
+        mc.setAttr(f'{mesh}.pnts[{vertex_it.index()}]', 0, 0, 0)
+        vertex_it.next()
