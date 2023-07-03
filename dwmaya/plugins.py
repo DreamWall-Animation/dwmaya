@@ -3,6 +3,7 @@ __copyright__ = 'DreamWall'
 __license__ = 'MIT'
 
 
+import os
 import maya.cmds as mc
 
 
@@ -14,7 +15,8 @@ def remove_autoloads(excludes=None):
     if excludes is None:
         excludes = ['autoLoader']
     for plugin in mc.pluginInfo(query=True, listPluginsPath=True):
-        if plugin in excludes:
+        name = os.path.splitext(os.path.basename(plugin))[0]
+        if name in excludes:
             continue
         mc.pluginInfo(plugin, edit=True, autoload=False)
     mc.pluginInfo(savePluginPrefs=True)
