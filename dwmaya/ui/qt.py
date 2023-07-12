@@ -119,7 +119,8 @@ def get_maya_window():
 def center_on_maya_window(widget):
     offset_x = widget.rect().width() / 2
     offset_y = widget.rect().height() / 2
-    center = get_maya_window().rect().center()
+    window = get_maya_window()
+    center = window.mapToGlobal(window.rect().center())
     widget.move(center.x() - offset_x, center.y() - offset_y)
 
 
