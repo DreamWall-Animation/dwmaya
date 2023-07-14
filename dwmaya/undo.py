@@ -7,6 +7,7 @@ import maya.cmds as mc
 
 
 def fix_undo_chunk(deferred_chunk_closure=False):
+    # sourcery skip: raise-specific-error
     """
     This decoractor ensure that the maya chunk is clean and record only one
     undo for the decorated function call. Some function records
@@ -14,7 +15,7 @@ def fix_undo_chunk(deferred_chunk_closure=False):
     deferred_chunk_closure:
         Give the possibility to excute the closure later.
         Some function trigger callbacks which create new undo step after
-        the decorated function is executed, adding unnecessary steps in the 
+        the decorated function is executed, adding unnecessary steps in the
         queue. Close it after prevent this but use it causionly, that can
         merge unexpected step as well.
     """
@@ -23,12 +24,12 @@ def fix_undo_chunk(deferred_chunk_closure=False):
             mc.undoInfo(openChunk=True)
             try:
                 result = func(*args, **kwargs)
-            except Exception, e:
+            except Exception as e:
                 raise Exception(e)
             finally:
                 if deferred_chunk_closure:
                     command = "mc.undoInfo(closeChunk=True)"
-                    cmds.evalDeferred(command, lowestPriority=True)
+                    mc.evalDeferred(command, lowestPriority=True)
                 else:
                     mc.undoInfo(closeChunk=True)
             return result

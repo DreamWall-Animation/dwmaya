@@ -204,7 +204,7 @@ def detect_triangles(mesh):
     return triangles
 
 
-def freeze_mesh_vertices(mesh):
+def reset_mesh_vertices(mesh):
     selection_list = om.MSelectionList()
     selection_list.add(mesh)
     dagpath = om.MDagPath()
