@@ -13,6 +13,14 @@ def get_shading_assignments():
     return {sg: nodes for sg, nodes in assignments.items() if nodes}
 
 
+def get_transform_childs_shading_assignment(transform):
+    content = mc.listRelatives(transform, allDescendents=True, type='mesh')
+    assignments = {
+        shading_engine: [mesh for mesh in meshes if mesh in content]
+        for shading_engine, meshes in get_shading_assignments().items()}
+    return {k: v for k, v in assignments.items() if v}
+
+
 def assign_material(shading_engine, objects):
     mc.sets(objects, forceElement=shading_engine)
 
