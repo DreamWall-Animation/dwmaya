@@ -9,7 +9,7 @@ import maya.mel as mm
 
 def get_shading_assignments():
     assignments = {
-        sg: mc.ls(mc.sets(sg, query=True, long=True))
+        sg: mc.ls(mc.sets(sg, query=True), long=True)
         for sg in mc.ls(type='shadingEngine')}
     return {sg: nodes for sg, nodes in assignments.items() if nodes}
 
