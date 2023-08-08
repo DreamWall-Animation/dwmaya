@@ -5,16 +5,38 @@ __license__ = 'MIT'
 
 import maya.cmds as mc
 import maya.mel as mm
+from dwmaya.namespace import strip_namespaces
 
 
 def get_shading_assignments():
+    """
+    Build a dictionnary listing the object by shading engine.
+    """
     assignments = {
         sg: mc.ls(mc.sets(sg, query=True), long=True)
         for sg in mc.ls(type='shadingEngine')}
     return {sg: nodes for sg, nodes in assignments.items() if nodes}
 
 
-def get_transform_childs_shading_assignment(transform, relative_path=False):
+def get_transform_childs_shading_assignment(
+        transform, relative_path=False, preserve_namespaces=False):
+    """
+    Build a dictionnary listing the objects by shading engine. Objects are
+    filtered from a transform parent. The path are stored relatively from that
+    parent.
+
+    This outliner state:
+        group1|group2|group3|mesh1  --> connected to --> shadingEngine1
+        group1|group2|mesh2  --> connected to --> shadingEngine1
+        mesh3  --> connected to --> shadingEngine1
+
+    This command
+        get_transform_childs_shading_assignment('group2', relative_path=True)
+
+    Should result this:
+        {shadingEngine1: ["group3|mesh1", "mesh2"]}
+    Note that "mesh3" is stripped out the result.
+    """
     content = mc.listRelatives(
         transform,
         allDescendents=True,
@@ -27,9 +49,34 @@ def get_transform_childs_shading_assignment(transform, relative_path=False):
 
     if relative_path:
         assignments = {
-            sg: [m.split(transform[-1]) for m in meshes if m in content]
+            sg: [m.split(transform)[-1] for m in meshes if m in content]
             for sg, meshes in assignments.items()}
+
+    if not preserve_namespaces:
+        assignments = {
+            sg: [strip_namespaces(m) for m in meshes]
+            for sg, meshes in assignments.items()}
+
     return {k: v for k, v in assignments.items() if v}
+
+
+def apply_shading_assignment_to_transfom_childs(
+        assignments, transform, namespace=None):
+    """
+    Apply a shading assignment generated from function
+    get_transform_childs_shading_assignment()
+    """
+    for shading_engine, meshes in assignments.items():
+        if namespace:
+            meshes = ['|'.join([
+                ':'.join((namespace.strip(':'), element.split(':')[-1]))
+                for element in mesh.split('|')])
+                for mesh in meshes]
+
+        meshes = [
+            '|{0}|{1}'.format(transform.strip('|'), m.strip('|'))
+            for m in meshes]
+        assign_material(shading_engine, meshes)
 
 
 def assign_material(shading_engine, objects):
