@@ -9,15 +9,26 @@ import maya.mel as mm
 
 def get_shading_assignments():
     assignments = {
-        sg: mc.sets(sg, query=True) for sg in mc.ls(type='shadingEngine')}
+        sg: mc.ls(mc.sets(sg, query=True, long=True))
+        for sg in mc.ls(type='shadingEngine')}
     return {sg: nodes for sg, nodes in assignments.items() if nodes}
 
 
-def get_transform_childs_shading_assignment(transform):
-    content = mc.listRelatives(transform, allDescendents=True, type='mesh')
+def get_transform_childs_shading_assignment(transform, relative_path=False):
+    content = mc.listRelatives(
+        transform,
+        allDescendents=True,
+        type='mesh',
+        fullPath=True)
+
     assignments = {
-        shading_engine: [mesh for mesh in meshes if mesh in content]
-        for shading_engine, meshes in get_shading_assignments().items()}
+        sg: [mesh for mesh in meshes if mesh in content]
+        for sg, meshes in get_shading_assignments().items()}
+
+    if relative_path:
+        assignments = {
+            sg: [m.split(transform[-1]) for m in meshes if m in content]
+            for sg, meshes in assignments.items()}
     return {k: v for k, v in assignments.items() if v}
 
 
