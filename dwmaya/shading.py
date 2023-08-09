@@ -93,6 +93,12 @@ def create_material(shader_type):
     return shader, shadingEngine
 
 
+def clear_shading_assignments(shading_engines):
+    for shading_engine in shading_engines:
+        assigned_objects = mc.sets(shading_engine, query=True)
+        mc.sets(assigned_objects, remove=shading_engine)
+
+
 def set_texture(attribute, texture_path):
     file_node = mc.shadingNode('file', asTexture=True, isColorManaged=True)
     p2t_node = mc.shadingNode('place2dTexture', asUtility=True)
