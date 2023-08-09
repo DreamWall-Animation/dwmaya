@@ -3,6 +3,7 @@ __copyright__ = 'DreamWall'
 __license__ = 'MIT'
 
 
+import os
 import maya.cmds as mc
 import maya.mel as mm
 from dwmaya.namespace import strip_namespaces
@@ -118,6 +119,47 @@ def set_texture(attribute, texture_path):
             p2t=p2t_node, fn=file_node, attribute=attribute))
     mc.setAttr(file_node + '.fileTextureName', texture_path, type='string')
     return file_node
+
+
+def list_texture_attributes(shading_engines):
+    inputs = mc.listConnections(shading_engines, destination=False)
+    shaders = mc.ls(inputs, materials=True)
+    history = mc.listHistory(shaders)
+    texture_attributes = []
+    for node in history:
+        texture_attributes.extend([
+            '{0}.{1}'.format(node, a)
+            for a in mc.listAttr(node, usedAsFilename=True) or []])
+    return texture_attributes
+
+
+def list_texture_filepaths(shading_engines):
+    textures = []
+    for attribute in list_texture_attributes(shading_engines):
+        try:
+            filepath = mc.getAttr(attribute)
+            if filepath:
+                textures.append(filepath)
+        except ValueError:
+            if '.' not in attribute:
+                raise
+            # This attribute is ghost and does not exists. Skip it.
+    return textures
+
+
+def replace_textures_root_directory(shading_engines, root):
+    for attribute in list_texture_attributes(shading_engines):
+        try:
+            filepath = mc.getAttr(attribute)
+            if not filepath:
+                continue
+            new_filepath = (
+                '{0}/{1}'.format(root, os.path.basename(filepath)))
+            mc.setAttr(attribute, new_filepath, type='string')
+        except ValueError:
+            if '.' not in attribute:
+                raise
+            # This attribute is ghost and does not exists. Skip it.
 
 
 def project_texture(file_node, camera=None):
