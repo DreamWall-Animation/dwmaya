@@ -55,7 +55,7 @@ def get_transform_childs_shading_assignment(
 
     if not preserve_namespaces:
         assignments = {
-            sg: [strip_namespaces(m) for m in meshes]
+            strip_namespaces(sg): [strip_namespaces(m) for m in meshes]
             for sg, meshes in assignments.items()}
 
     return {k: v for k, v in assignments.items() if v}
