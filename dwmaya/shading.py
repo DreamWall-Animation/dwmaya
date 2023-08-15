@@ -44,6 +44,9 @@ def get_transform_childs_shading_assignment(
         type='mesh',
         fullPath=True)
 
+    if content is None:
+        return {}
+
     assignments = {
         sg: [mesh for mesh in meshes if mesh in content]
         for sg, meshes in get_shading_assignments().items()}
