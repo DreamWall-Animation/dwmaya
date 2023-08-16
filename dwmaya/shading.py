@@ -18,7 +18,7 @@ UDIM_UV_PATTERN = r'_u<u>_v<v>'
 UDIM_UV_RE_PATTERN = r'_u\d_v\d'
 
 
-def get_shading_assignments():
+def get_materials_assignments():
     """
     Build a dictionnary listing the object by shading engine.
     """
@@ -28,7 +28,7 @@ def get_shading_assignments():
     return {sg: nodes for sg, nodes in assignments.items() if nodes}
 
 
-def get_transform_childs_shading_assignment(
+def get_transform_childs_materials_assignment(
         transform, relative_path=False, preserve_namespaces=False):
     """
     Build a dictionnary listing the objects by shading engine. Objects are
@@ -41,7 +41,7 @@ def get_transform_childs_shading_assignment(
         mesh3  --> connected to --> shadingEngine1
 
     This command
-        get_transform_childs_shading_assignment('group2', relative_path=True)
+        get_transform_childs_materials_assignment('group2', relative_path=True)
 
     Should result this:
         {shadingEngine1: ["group3|mesh1", "mesh2"]}
@@ -58,7 +58,7 @@ def get_transform_childs_shading_assignment(
 
     assignments = {
         sg: [mesh for mesh in meshes if mesh in content]
-        for sg, meshes in get_shading_assignments().items()}
+        for sg, meshes in get_materials_assignments().items()}
 
     if relative_path:
         assignments = {
@@ -73,11 +73,11 @@ def get_transform_childs_shading_assignment(
     return {k: v for k, v in assignments.items() if v}
 
 
-def apply_shading_assignment_to_transfom_childs(
+def apply_materials_assignment_to_transfom_childs(
         assignments, transform, namespace=None):
     """
     Apply a shading assignment generated from function
-    get_transform_childs_shading_assignment()
+    get_transform_childs_materials_assignment()
     """
     for shading_engine, meshes in assignments.items():
         if namespace:
@@ -105,7 +105,7 @@ def create_material(shader_type):
     return shader, shadingEngine
 
 
-def clear_shading_assignments(shading_engines):
+def clear_materials_assignments(shading_engines):
     for shading_engine in shading_engines:
         assigned_objects = mc.sets(shading_engine, query=True)
         mc.sets(assigned_objects, remove=shading_engine)
