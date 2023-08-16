@@ -44,6 +44,15 @@ def open_file_with_default_app(path):
         subprocess.Popen(['open', path])
 
 
+def save_as():
+    name = mc.fileDialog2(dialogStyle=2, fileFilter='Maya Ascii (*.ma)')
+    if not name:
+        return False
+    mc.file(rename=name)
+    mc.file(save=True, type='mayaAscii')
+    return True
+
+
 def save_if_modified_prompt(dont_save_returns=True):
     if not mc.file(query=True, modified=True):
         return True
@@ -60,5 +69,7 @@ def save_if_modified_prompt(dont_save_returns=True):
     elif choice == dont_save:
         return dont_save_returns
     elif choice == save:
+        if not current_scene_path:
+            return save_as()
         mc.file(save=True)
         return True
