@@ -4,9 +4,18 @@ __license__ = 'MIT'
 
 
 import os
+import re
+import glob
+
 import maya.cmds as mc
 import maya.mel as mm
+
 from dwmaya.namespace import strip_namespaces
+
+
+UDIM_EXTENSION_PATTERN = r'\.1001\..{2,4}$'
+UDIM_UV_PATTERN = r'_u<u>_v<v>'
+UDIM_UV_RE_PATTERN = r'_u\d_v\d'
 
 
 def get_shading_assignments():
@@ -142,13 +151,38 @@ def list_texture_attributes(shading_engines):
     return texture_attributes
 
 
+def get_udim_filepaths(path):
+    """
+    If filepath looks like UDIM pattern, return all paths matching this
+    pattern.
+    """
+    udim_paths = []
+    extension = os.path.splitext(path)[-1]
+    path_start_length = None
+    if re.compile(UDIM_EXTENSION_PATTERN).match(path):
+        path_start_length = path.lower().index('1001' + extension)
+    elif UDIM_UV_PATTERN in path.lower():
+        path_start_length = path.lower().index(UDIM_UV_PATTERN)
+    elif re.compile('.*' + UDIM_UV_RE_PATTERN + '.*').match(path):
+        path_start_length = len(re.split(UDIM_UV_RE_PATTERN, path)[0])
+    if path_start_length:
+        pattern = path[:path_start_length] + '*' + extension
+        for path in glob.glob(pattern):
+            udim_paths.append(path.replace('\\', '/'))
+    return udim_paths
+
+
 def list_texture_filepaths(shading_engines):
     textures = []
     for attribute in list_texture_attributes(shading_engines):
         try:
             filepath = mc.getAttr(attribute)
             if filepath:
-                textures.append(filepath)
+                udim_paths = get_udim_filepaths(filepath)
+                if udim_paths:
+                    textures.extend(udim_paths)
+                else:
+                    textures.append(filepath)
         except ValueError:
             if '.' not in attribute:
                 raise
