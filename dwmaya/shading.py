@@ -205,6 +205,20 @@ def replace_textures_root_directory(shading_engines, root):
             # This attribute is ghost and does not exists. Skip it.
 
 
+def replace_texture(src, dst, shading_engines):
+    for attribute in list_texture_attributes(shading_engines):
+        try:
+            filepath = mc.getAttr(attribute)
+            if not filepath:
+                continue
+            if filepath == src:
+                mc.setAttr(attribute, dst, type='string')
+        except ValueError:
+            if '.' not in attribute:
+                raise
+            # This attribute is ghost and does not exists. Skip it.
+
+
 def project_texture(file_node, camera=None):
     target_attr = mc.listConnections(file_node + '.outColor', plugs=True)[0]
     projection = mc.shadingNode('projection', asTexture=True)
