@@ -74,7 +74,7 @@ def get_transform_childs_materials_assignment(
 
 
 def apply_materials_assignment_to_transfom_childs(
-        assignments, transform, namespace=None):
+        assignments, transform, skip_missing_objects=True, namespace=None):
     """
     Apply a shading assignment generated from function
     get_transform_childs_materials_assignment()
@@ -89,6 +89,8 @@ def apply_materials_assignment_to_transfom_childs(
         meshes = [
             '|{0}|{1}'.format(transform.strip('|'), m.strip('|'))
             for m in meshes]
+        if skip_missing_objects:
+            meshes = [m for m in meshes if mc.objExists(m)]
         assign_material(shading_engine, meshes)
 
 
