@@ -32,28 +32,30 @@ def files_in_the_scene():
 def get_all_file_paths(
         include_unloaded_references=False, include_workspace=False):
     if not mc.file(q=True, sceneName=True):
-        raise Exception('Please save file first')
+        raise ValueError('Please save file first')
     if not mc.file(q=True, exists=True):
-        raise Exception('Scene does not exist')
+        raise FileNotFoundError('Scene does not exist')
 
     files = files_in_the_scene()
     files.extend(material_files())
     if include_workspace:
         files.append(mc.workspace(q=True, fullName=True) + '/workspace.mel')
 
-    if include_unloaded_references is True:
-        for ref_node in mc.ls(type='reference'):
-            if ref_node.find('sharedReferenceNode') != -1:
-                continue
-            was_loaded = mc.referenceQuery(ref_node, isLoaded=True)
-            if was_loaded is False:
-                # load ref if needed
-                mc.file(loadReference=ref_node, loadReferenceDepth='all')
-            files.extend(mc.file(
-                query=True, list=True, withoutCopyNumber=True) or [])
-            files.extend(material_files())
-            if was_loaded is False:
-                mc.file(unloadReference=ref_node)  # restore unloaded state
+    if not include_unloaded_references:
+        return files
+
+    for ref_node in mc.ls(type='reference'):
+        if ref_node.find('sharedReferenceNode') != -1:
+            continue
+        was_loaded = mc.referenceQuery(ref_node, isLoaded=True)
+        if was_loaded is False:
+            # load ref if needed
+            mc.file(loadReference=ref_node, loadReferenceDepth='all')
+        files.extend(mc.file(
+            query=True, list=True, withoutCopyNumber=True) or [])
+        files.extend(material_files())
+        if was_loaded is False:
+            mc.file(unloadReference=ref_node)  # restore unloaded state
 
     return list(set(files))  # remove duplicates
 
