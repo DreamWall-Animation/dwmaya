@@ -67,7 +67,7 @@ def export_node_content(
     with temporarily_reparent_transform_children(node, parent) as content:
         if additional_non_dag_nodes:
             content.extend(additional_non_dag_nodes)
-        mc.select(content)
+        mc.select(content, noExpand=True)
         type_ = 'mayaBinary' if binary else 'mayaAscii'
         filepath = mc.file(
             filepath, exportSelected=True, type=type_, force=force)

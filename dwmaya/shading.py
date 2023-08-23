@@ -138,7 +138,7 @@ def set_texture(attribute, texture_path):
         connectAttr -force {fn}.outColor {attribute};'''.format(
             p2t=p2t_node, fn=file_node, attribute=attribute))
     mc.setAttr(file_node + '.fileTextureName', texture_path, type='string')
-    return file_node
+    return file_node, p2t_node
 
 
 def list_texture_attributes(shading_engines):
