@@ -48,7 +48,7 @@ def save_as():
     name = mc.fileDialog2(dialogStyle=2, fileFilter='Maya Ascii (*.ma)')
     if not name:
         return False
-    mc.file(rename=name)
+    mc.file(rename=name[0])
     mc.file(save=True, type='mayaAscii')
     return True
 
