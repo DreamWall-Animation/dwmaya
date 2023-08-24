@@ -105,6 +105,11 @@ def switch_filepaths_in_maya_file(
 @preserve_maya_scenename
 def save_temporary_scene_copy():
     scene_name = f'{tempfile.NamedTemporaryFile().name}.ma'
-    mc.file(rename=scene_name)
-    mc.file(save=True, force=True, type='mayaAscii')
+    save_scene_copy(scene_name)
     return scene_name
+
+
+@preserve_maya_scenename
+def save_scene_copy(path):
+    mc.file(rename=path)
+    mc.file(save=True, force=True, type='mayaAscii')
