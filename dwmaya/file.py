@@ -100,3 +100,11 @@ def switch_filepaths_in_maya_file(
         return clean
     shutil.copy(clean, maya_file_path)
     return maya_file_path
+
+
+@preserve_maya_scenename
+def save_temporary_scene_copy():
+    scene_name = f'{tempfile.NamedTemporaryFile().name}.ma'
+    mc.file(rename=scene_name)
+    mc.file(save=True, force=True, type='mayaAscii')
+    return scene_name
