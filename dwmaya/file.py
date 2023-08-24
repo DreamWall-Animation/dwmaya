@@ -41,7 +41,8 @@ def preserve_maya_scenename(func):
         try:
             return func(*args, **kwargs)
         finally:
-            mc.file(rename=scene_name)
+            if scene_name:
+                mc.file(rename=scene_name)
     return decorator
 
 
