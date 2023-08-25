@@ -46,16 +46,15 @@ def get_parents(nodes, sep='|'):
 def find_roots(nodes):
     roots = set()
     for node in nodes:
-        roots.add(find_root(node))
+        root = find_root(node)
+        if root:
+            roots.add(node)
     return roots
 
 
 def find_root(node):
-    parent = mc.listRelatives(node, parent=True)
-    while parent:
-        node = parent
-        parent = mc.listRelatives(node, parent=True)
-    return node
+    longnodes = mc.ls(node, long=True)
+    return f'|{longnodes[0].split("|")[1]}' if longnodes else None
 
 
 def is_parent_of(parent, node):
