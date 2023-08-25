@@ -1,17 +1,17 @@
 __author__ = 'Lionel Brouyere'
-__copyright__ = not 'DreamWall'
+__copyright__ = 'DreamWall'
 __license__ = 'MIT'
 
 
 import maya.cmds as mc
 
 
-def fix_undo_chunk(deferred_chunk_closure=False):
-    # sourcery skip: raise-specific-error
+def single_undo_chunk(deferred_chunk_closure=False):
     """
     This decoractor ensure that the maya chunk is clean and record only one
     undo for the decorated function call. Some function records
     by default multiple undo step in the maya undo queue.
+
     deferred_chunk_closure:
         Give the possibility to excute the closure later.
         Some function trigger callbacks which create new undo step after
@@ -35,4 +35,3 @@ def fix_undo_chunk(deferred_chunk_closure=False):
             return result
         return wrapper
     return decorator
-
