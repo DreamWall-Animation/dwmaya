@@ -205,6 +205,11 @@ def detect_triangles(mesh):
     return triangles
 
 
+def reset_mesh_vertices(mesh):
+    for i in range(mc.polyEvaluate(mesh, vertex=True)):
+        mc.setAttr(f'{mesh}.pnts[{i}]', 0, 0, 0)
+
+
 @single_undo_chunk
 def reset_meshes_vertices(meshes, treshold=0.0001):
     # Check if any vertex is above treshold first:
@@ -215,6 +220,5 @@ def reset_meshes_vertices(meshes, treshold=0.0001):
                 return False
     # Set values to 0
     for mesh in meshes:
-        for i in range(mc.polyEvaluate(mesh, vertex=True)):
-            mc.setAttr(f'{mesh}.pnts[{i}]', 0, 0, 0)
+        reset_mesh_vertices(mesh)
     return True
