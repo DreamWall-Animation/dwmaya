@@ -7,6 +7,7 @@ import re
 import maya.cmds as mc
 import maya.api.OpenMaya as om2
 import maya.OpenMaya as om
+from dwmaya.undo import single_undo_chunk
 
 
 FINALING_MESH_NAME = '{transform}_finaling_copy_{id}'
@@ -204,12 +205,16 @@ def detect_triangles(mesh):
     return triangles
 
 
-def reset_mesh_vertices(mesh):
-    selection_list = om.MSelectionList()
-    selection_list.add(mesh)
-    dagpath = om.MDagPath()
-    selection_list.getDagPath(0, dagpath)
-    vertex_it = om.MItMeshVertex(dagpath)
-    while not vertex_it.isDone():
-        mc.setAttr(f'{mesh}.pnts[{vertex_it.index()}]', 0, 0, 0)
-        vertex_it.next()
+@single_undo_chunk
+def reset_meshes_vertices(meshes, treshold=0.0001):
+    # Check if any vertex is above treshold first:
+    for mesh in meshes:
+        for i in range(mc.polyEvaluate(mesh, vertex=True)):
+            attr = f'{mesh}.pnts[{i}]'
+            if max(mc.getAttr(attr)[0]) > treshold:
+                return False
+    # Set values to 0
+    for mesh in meshes:
+        for i in range(mc.polyEvaluate(mesh, vertex=True)):
+            mc.setAttr(f'{mesh}.pnts[{i}]', 0, 0, 0)
+    return True
