@@ -210,7 +210,7 @@ def reset_mesh_vertices(mesh):
         mc.setAttr(f'{mesh}.pnts[{i}]', 0, 0, 0)
 
 
-def check_vertices_are_freezed(meshes, treshold=0.0001):
+def check_vertices_are_freezed(meshes, treshold=0):
     for mesh in meshes:
         for i in range(mc.polyEvaluate(mesh, vertex=True)):
             attr = f'{mesh}.pnts[{i}]'
@@ -219,7 +219,7 @@ def check_vertices_are_freezed(meshes, treshold=0.0001):
     return True
 
 
-@single_undo_chunk
+@single_undo_chunk()
 def reset_meshes_vertices(meshes, treshold=0.0001):
     # Check if any vertex is above treshold first:
     if not check_vertices_are_freezed(meshes, treshold):
