@@ -43,6 +43,13 @@ def get_parents(nodes, sep='|'):
     return parents
 
 
+def find_roots(nodes):
+    roots = set()
+    for node in nodes:
+        roots.add(find_root(node))
+    return roots
+
+
 def find_root(node):
     parent = mc.listRelatives(node, parent=True)
     while parent:
