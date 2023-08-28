@@ -40,7 +40,7 @@ def open_file_with_default_app(path):
         os.startfile(path.replace('/', '\\'))
     elif system == 'Linux':
         subprocess.Popen(['xdg-open', path])
-    elif system == 'Mac':
+    elif system == 'Darwin':
         subprocess.Popen(['open', path])
 
 
