@@ -6,6 +6,7 @@ __license__ = 'MIT'
 import os
 import re
 import glob
+from contextlib import contextmanager
 
 import maya.cmds as mc
 import maya.mel as mm
@@ -111,6 +112,18 @@ def clear_materials_assignments(shading_engines):
     for shading_engine in shading_engines:
         assigned_objects = mc.sets(shading_engine, query=True)
         mc.sets(assigned_objects, remove=shading_engine)
+
+
+@contextmanager
+def temp_default_material():
+    assignments = get_materials_assignments()
+    try:
+        for shading_engine, nodes in assignments.items():
+            assign_material('initialShadingGroup', nodes)
+        yield
+    finally:
+        for shading_engine, nodes in assignments.items():
+            assign_material(shading_engine, nodes)
 
 
 def set_texture(attribute, texture_path):
