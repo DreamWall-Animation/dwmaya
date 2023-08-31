@@ -49,6 +49,12 @@ ANIMATION_NODE_TYPES = (
     'animLayer')
 
 
+def get_scene_frames():
+    return list(range(
+        int(mc.playbackOptions(query=True, min=True)),
+        int(mc.playbackOptions(query=True, max=True) + 1)))
+
+
 def get_anim_curves():
     return mc.ls(type=ANIMATION_CURVE_TYPES)
 
