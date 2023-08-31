@@ -9,6 +9,8 @@ from contextlib import contextmanager
 
 import maya.mel as mm
 import maya.cmds as mc
+import maya.OpenMaya as om
+import maya.OpenMayaAnim as oma
 import maya.api.OpenMaya as om2
 import maya.api.OpenMayaAnim as oma2
 
@@ -47,6 +49,21 @@ ANIMATION_NODE_TYPES = (
     'animCurveUT',
     'animCurveUU',
     'animLayer')
+
+
+OPEN_MAYA_TANGENT_TYPES = {
+    'global': oma2.MFnAnimCurve.kTangentGlobal,
+    'fixed': oma2.MFnAnimCurve.kTangentFixed,
+    'linear': oma2.MFnAnimCurve.kTangentLinear,
+    'flat': oma2.MFnAnimCurve.kTangentFlat,
+    'smooth': oma2.MFnAnimCurve.kTangentSmooth,
+    'step': oma2.MFnAnimCurve.kTangentStep,
+    'slow': oma2.MFnAnimCurve.kTangentSlow,
+    'fast': oma2.MFnAnimCurve.kTangentFast,
+    'clamped': oma2.MFnAnimCurve.kTangentClamped,
+    'plateau': oma2.MFnAnimCurve.kTangentPlateau,
+    'stepnext': oma2.MFnAnimCurve.kTangentStepNext,
+}
 
 
 def get_scene_frames():
@@ -497,3 +514,38 @@ def select_constraints_on_selected_references():
     else:
         mc.warning('%i constraints found' % len(constraints))
         mc.select(constraints)
+
+
+def get_openmaya_curve(curve_name):
+    sel = om.MSelectionList()
+    sel.add(curve_name)
+    mobj = om.MObject()
+    sel.getDependNode(0, mobj)
+    return oma.MFnAnimCurve(mobj)
+
+
+def bake_animation(
+        anim_curves, frames, skip_static_curves=True,
+        tangent_in='stepnext', tangent_out='step'):
+    """
+    This is faster than using maya.cmds.setKeyframes().
+    """
+    tangent_in = OPEN_MAYA_TANGENT_TYPES[tangent_in]
+    tangent_out = OPEN_MAYA_TANGENT_TYPES[tangent_out]
+    time_unit = om.MTime.uiUnit()
+    for curve_name in anim_curves:
+        om_curve = get_openmaya_curve(curve_name)
+        if om_curve.isStatic() and skip_static_curves:
+            continue
+        time_array = om.MTimeArray()
+        value_array = om.MDoubleArray()
+        for frame in frames:
+            mtime = om.MTime(frame, time_unit)
+            time_array.append(mtime)
+            value_array.append(om_curve.evaluate(mtime))
+        om_curve.addKeys(
+            time_array,
+            value_array,
+            oma.MFnAnimCurve.kTangentStepNext,
+            oma.MFnAnimCurve.kTangentStep,
+            False)
