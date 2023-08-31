@@ -3,14 +3,38 @@ import re
 import shutil
 import codecs
 import tempfile
+from contextlib import contextmanager
+
 import maya.cmds as mc
+
 from dwmaya.hierarchy import temporarily_reparent_transform_children
 from dwmaya.node import temporary_nodename
 from dwmaya.selection import preserve_selection
 
 
-def import_maya_file(filepath, parent=None, namespace=None):
+def check_if_scene_is_saved(check_modified=True):
+    scene_path = mc.file(query=True, sceneName=True)
+    if not scene_path:
+        raise ValueError('Scene not saved.')
+    if not mc.file(query=True, exists=True):
+        raise FileNotFoundError('Scene file does not exist, please save.')
+    if check_modified:
+        if mc.file(query=True, modified=True):
+            raise ValueError('Scene is modified, please save.')
+    return scene_path
 
+
+@contextmanager
+def preserve_current_scene_state():
+    """Ensure scene is saved first, re-opens it at the end."""
+    scene_path = check_if_scene_is_saved()
+    try:
+        yield
+    finally:
+        mc.file(scene_path, open=True, force=True, prompt=False)
+
+
+def import_maya_file(filepath, parent=None, namespace=None):
     tmp = temporary_nodename(namespace)
     if namespace:
         content = mc.file(

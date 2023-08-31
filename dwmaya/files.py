@@ -31,9 +31,9 @@ def files_in_the_scene():
 
 def get_all_file_paths(
         include_unloaded_references=False, include_workspace=False):
-    if not mc.file(q=True, sceneName=True):
+    if not mc.file(query=True, sceneName=True):
         raise ValueError('Please save file first')
-    if not mc.file(q=True, exists=True):
+    if not mc.file(query=True, exists=True):
         raise FileNotFoundError('Scene does not exist')
 
     files = files_in_the_scene()
