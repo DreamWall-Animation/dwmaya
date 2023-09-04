@@ -110,16 +110,9 @@ def get_references():
     return refs
 
 
-def remove_reference_number(path):
-    if path.endswith('}'):
-        path = path.split('{')[:-1]
-        path = '{'.join(path)
-    return path
-
-
 def get_reference_path(ref):
-    path = mc.referenceQuery(ref, filename=True, unresolvedName=True)
-    return remove_reference_number(path)
+    return mc.referenceQuery(
+        ref, filename=True, unresolvedName=True, withoutCopyNumber=True)
 
 
 def list_references_paths():
@@ -129,9 +122,9 @@ def list_references_paths():
 def chose_reference_from_scene_prompt():
     choices = []
     for ref in get_references():
-        path = mc.referenceQuery(ref, filename=True)
+        path = mc.referenceQuery(ref, filename=True, withoutCopyNumber=True)
         namespace = mc.file(path, query=True, namespace=True)
-        name = os.path.basename(remove_reference_number(path))
+        name = os.path.basename(path)
         label = '%s: %s' % (namespace, name)
         choices.append((label, ref))
     return chose_from_list_prompt(choices)
@@ -146,8 +139,8 @@ def change_reference_path_prompt():
     if not reference_node:
         return
     ref_path = mc.referenceQuery(
-        reference_node, filename=True, unresolvedName=True)
-    ref_path = remove_reference_number(ref_path)
+        reference_node, filename=True, unresolvedName=True,
+        withoutCopyNumber=True)
     resolved_path = os.path.expandvars(ref_path)
     directory = os.path.dirname(resolved_path)
     name = os.path.basename(resolved_path)
