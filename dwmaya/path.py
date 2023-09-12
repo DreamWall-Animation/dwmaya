@@ -45,7 +45,12 @@ def open_file_with_default_app(path):
 
 
 def save_as():
-    name = mc.fileDialog2(dialogStyle=2, fileFilter='Maya Ascii (*.ma)')
+    start_dir = get_scene_path() or None
+    if start_dir:
+        start_dir = os.path.dirname(start_dir)
+    name = mc.fileDialog2(
+        dialogStyle=2, fileFilter='Maya Ascii (*.ma)',
+        startingDirectory=start_dir)
     if not name:
         return False
     mc.file(rename=name[0])
