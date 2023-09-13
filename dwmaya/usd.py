@@ -1,3 +1,8 @@
+__author__ = 'Olivier Evers'
+__copyright__ = 'DreamWall'
+__license__ = 'MIT'
+
+
 import os
 import tempfile
 import subprocess
