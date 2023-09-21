@@ -29,7 +29,7 @@ def get_materials_assignments():
     return {sg: nodes for sg, nodes in assignments.items() if nodes}
 
 
-def get_transform_childs_materials_assignment(
+def get_transform_childs_materials_assignments(
         transform, relative_path=False, preserve_namespaces=False):
     """
     Build a dictionnary listing the objects by shading engine. Objects are
@@ -42,7 +42,7 @@ def get_transform_childs_materials_assignment(
         mesh3  --> connected to --> shadingEngine1
 
     This command
-        get_transform_childs_materials_assignment('group2', relative_path=True)
+        get_transform_childs_materials_assignments('group2', relative_path=True)
 
     Should result this:
         {shadingEngine1: ["group3|mesh1", "mesh2"]}
@@ -78,7 +78,7 @@ def apply_materials_assignment_to_transfom_childs(
         assignments, transform, skip_missing_objects=True, namespace=None):
     """
     Apply a shading assignment generated from function
-    get_transform_childs_materials_assignment()
+    get_transform_childs_materials_assignments()
     """
     for shading_engine, meshes in assignments.items():
         if namespace:
