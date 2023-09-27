@@ -202,7 +202,7 @@ def list_texture_filepaths(shading_engines):
             if '.' not in attribute:
                 raise
             # This attribute is ghost and does not exists. Skip it.
-    return textures
+    return sorted(list(set(textures)))
 
 
 def replace_textures_root_directory(shading_engines, root):
