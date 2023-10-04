@@ -246,3 +246,10 @@ def project_texture(file_node, camera=None):
         place3d_texture = mc.shadingNode('place3dTexture', asUtility=True)
         mc.connectAttr(place3d_texture + '.wim[0]', projection + '.pm')
     return projection
+
+
+def assign_shading_per_faces(shading_engine, mesh_transform):
+    mc.sets(mesh_transform, remove=shading_engine)
+    face_count = mc.polyEvaluate(mesh_transform, face=True)
+    faces = f'{mesh_transform}.f[0:{face_count - 1}]'
+    mc.sets(faces, forceElement=shading_engine)

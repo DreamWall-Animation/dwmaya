@@ -49,6 +49,8 @@ def import_maya_file(filepath, parent=None, namespace=None):
         ref_content = mc.listRelatives(tmp, fullPath=True)
         if ref_content and parent:
             mc.parent(ref_content, parent)
+        elif ref_content:
+            mc.parent(ref_content, world=True)
         mc.delete(tmp)
 
     non_dag = list(set(content) - set(mc.ls(content, dagObjects=True)))

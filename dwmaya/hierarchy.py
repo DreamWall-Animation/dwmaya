@@ -131,7 +131,8 @@ def temporarily_reparent_transform_children(transform, parent=None):
         else:
             result = mc.parent(content, world=True)
         yield result[:]
-
+    except BaseException:
+        raise
     finally:
         if result:
             mc.parent(result, transform)
