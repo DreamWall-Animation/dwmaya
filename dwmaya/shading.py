@@ -18,6 +18,9 @@ from dwmaya.namespace import strip_namespaces
 UDIM_EXTENSION_PATTERN = r'\.1001\..{2,4}$'
 UDIM_UV_PATTERN = r'_u<u>_v<v>'
 UDIM_UV_RE_PATTERN = r'_u\d_v\d'
+EXCLUDES_FROM_SHADING_HISTORY = [
+    'defaultColorMgtGlobals'
+]
 
 
 def get_materials_assignments():
@@ -158,7 +161,9 @@ def set_texture(attribute, texture_path):
 def list_texture_attributes(shading_engines):
     inputs = mc.listConnections(shading_engines, destination=False)
     shaders = mc.ls(inputs, materials=True)
-    history = list_full_history(shaders)
+    history = [
+        n for n in list_full_history(shaders)
+        if n not in EXCLUDES_FROM_SHADING_HISTORY]
     texture_attributes = []
     for node in history:
         texture_attributes.extend([

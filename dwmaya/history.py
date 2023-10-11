@@ -23,5 +23,5 @@ def find_input_nodes(node, depth=0, max_depth=10):
 def list_full_history(nodes):
     history = []
     for node in nodes:
-        history.expand(find_input_nodes(node, max_depth=100))
+        history.extend(find_input_nodes(node, max_depth=100))
     return list(set(history))
