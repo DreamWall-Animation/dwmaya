@@ -11,6 +11,7 @@ from contextlib import contextmanager
 import maya.cmds as mc
 import maya.mel as mm
 
+from dwmaya.history import list_full_history
 from dwmaya.namespace import strip_namespaces
 
 
@@ -157,7 +158,7 @@ def set_texture(attribute, texture_path):
 def list_texture_attributes(shading_engines):
     inputs = mc.listConnections(shading_engines, destination=False)
     shaders = mc.ls(inputs, materials=True)
-    history = mc.listHistory(shaders)
+    history = list_full_history(shaders)
     texture_attributes = []
     for node in history:
         texture_attributes.extend([
