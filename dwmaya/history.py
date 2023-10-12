@@ -1,27 +1,19 @@
 import maya.cmds as mc
 
 
-def find_input_nodes(node, depth=0, max_depth=10):
-    input_nodes = []
-
-    if depth >= max_depth:
-        return input_nodes
-
+def _recursive_add_input_nodes(node: str, history: set):
     connections = mc.listConnections(
         node, source=True, destination=False, plugs=True)
-
-    if connections:
-        for connection in connections:
-            input_node = connection.split('.')[0]
-            input_nodes.append(input_node)
-            input_nodes += find_input_nodes(
-                input_node, depth=depth + 1, max_depth=max_depth)
-
-    return input_nodes
+    if not connections:
+        return
+    for input_node in mc.ls(connections, long=True, objectsOnly=True):
+        if input_node not in history:
+            history.add(input_node)
+            _recursive_add_input_nodes(input_node, history)
 
 
 def list_full_history(nodes):
-    history = []
-    for node in nodes:
-        history.extend(find_input_nodes(node, max_depth=100))
-    return list(set(history))
+    history = set()
+    for node in mc.ls(nodes, long=True):
+        _recursive_add_input_nodes(node, history)
+    return list(history)
