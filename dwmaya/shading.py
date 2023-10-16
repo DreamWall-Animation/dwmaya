@@ -130,7 +130,7 @@ def temp_default_material():
             assign_material(shading_engine, nodes)
 
 
-def set_texture(attribute, texture_path):
+def set_texture(attribute, texture_path, file_output='outColor'):
     file_node = mc.shadingNode('file', asTexture=True, isColorManaged=True)
     p2t_node = mc.shadingNode('place2dTexture', asUtility=True)
     mm.eval('''
@@ -152,8 +152,9 @@ def set_texture(attribute, texture_path):
         connectAttr -f {p2t}.vertexCameraOne {fn}.vertexCameraOne;
         connectAttr {p2t}.outUV {fn}.uv;
         connectAttr {p2t}.outUvFilterSize {fn}.uvFilterSize;
-        connectAttr -force {fn}.outColor {attribute};'''.format(
-            p2t=p2t_node, fn=file_node, attribute=attribute))
+        connectAttr -force {fn}.{output} {attribute};'''.format(
+            p2t=p2t_node, fn=file_node, attribute=attribute,
+            output=file_output))
     mc.setAttr(file_node + '.fileTextureName', texture_path, type='string')
     return file_node, p2t_node
 
