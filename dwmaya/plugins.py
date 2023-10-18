@@ -52,8 +52,11 @@ def find_nodetype_plugin(node_type):
 
 
 def list_plugin_nodes(plugin_name):
-    node_types = mc.pluginInfo(plugin_name, query=True, dependNode=True)
-    return mc.ls(type=node_types)
+    try:
+        node_types = mc.pluginInfo(plugin_name, query=True, dependNode=True)
+        return mc.ls(type=node_types)
+    except RuntimeError:  # Plugin doesn not exists or not loaded
+        return []
 
 
 def ensure_plugin_loaded(*plugin_names):
