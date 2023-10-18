@@ -3,6 +3,8 @@ __copyright__ = 'DreamWall'
 __license__ = 'MIT'
 
 
+from contextlib import contextmanager
+
 import maya.OpenMaya as om
 import maya.OpenMayaUI as omui
 import maya.cmds as mc
@@ -58,10 +60,20 @@ def set_single_camera_renderable(cam):
         mc.getAttr(c + '.renderable')]
     if len(renderable_cameras) != 1 or renderable_cameras[0] != cam:
         print(renderable_cameras)
-        raise ValueError('%s should be renderable and no other camera.' % cam)
+        raise ValueError(f'{cam} should be renderable and no other camera.')
 
 
 def reset_pan_and_zoom(camera):
-    mc.setAttr('%s.verticalPan' % camera, 0)
-    mc.setAttr('%s.horizontalPan' % camera, 0)
-    mc.setAttr('%s.zoom' % camera, 1)
+    mc.setAttr(f'{camera}.verticalPan', 0)
+    mc.setAttr(f'{camera}.horizontalPan', 0)
+    mc.setAttr(f'{camera}.zoom', 1)
+
+
+@contextmanager
+def disable_panzoom_ctx(camera):
+    initial_panzoom_state = mc.getAttr(f'{camera}.panZoomEnabled')
+    mc.setAttr(f'{camera}.panZoomEnabled', False)
+    try:
+        yield
+    finally:
+        mc.setAttr(f'{camera}.panZoomEnabled', initial_panzoom_state)
