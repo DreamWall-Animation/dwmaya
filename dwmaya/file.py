@@ -67,8 +67,13 @@ def preserve_maya_scenename(func):
         try:
             return func(*args, **kwargs)
         finally:
-            if scene_name:
-                mc.file(rename=scene_name)
+            try:
+                if scene_name:
+                    mc.file(rename=scene_name)
+            except RuntimeError:
+                # Some temporary invalid filenames cant be set back :/
+                # Skip those situations
+                pass
     return decorator
 
 
