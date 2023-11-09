@@ -25,9 +25,9 @@ def check_if_scene_is_saved(check_modified=True):
 
 
 @contextmanager
-def preserve_current_scene_state():
+def preserve_current_scene_state(check_scene_saved=True):
     """Ensure scene is saved first, re-opens it at the end."""
-    scene_path = check_if_scene_is_saved()
+    scene_path = check_if_scene_is_saved(check_scene_saved)
     try:
         yield
     finally:
