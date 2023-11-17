@@ -529,6 +529,9 @@ def bake_animation(
         tangent_in='stepnext', tangent_out='step'):
     """
     This is faster than using maya.cmds.setKeyframes().
+
+    If a script needs to unlock animation layers, this will have to be placed
+    in an evalDeferred() call :(
     """
     tangent_in = OPEN_MAYA_TANGENT_TYPES[tangent_in]
     tangent_out = OPEN_MAYA_TANGENT_TYPES[tangent_out]
