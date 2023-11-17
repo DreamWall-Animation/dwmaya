@@ -72,7 +72,8 @@ AO_SETTINGS = dict(
 
 
 def create_tearoff_viewport(
-        camera, title=None, size=None, model_editor_kwargs=None, position=None):
+        camera, title=None, size=None, model_editor_kwargs=None,
+        position=None, time_slider=True):
     tearoff_window = mc.window(title=title)
 
     _model_editor_kwargs = model_editor_kwargs or dict()
@@ -94,7 +95,8 @@ def create_tearoff_viewport(
 
     mc.paneLayout()
     panel = mc.modelPanel()
-    mc.timePort(height=30, snap=True)
+    if time_slider:
+        mc.timePort(height=30, snap=True)
     mc.showWindow(tearoff_window)
     editor = mc.modelPanel(panel, query=True, modelEditor=True)
     mc.modelEditor(editor, edit=True, **model_editor_kwargs)
