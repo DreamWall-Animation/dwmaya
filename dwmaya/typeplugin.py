@@ -4,8 +4,9 @@ import maya.cmds as mc
 
 def create_type():
     mc.loadPlugin('Type', quiet=True)
+    pre_existing_types = mc.ls(type='type')
     mc.CreatePolygonType()
-    type_node = mc.ls(type='type')[-1]
+    type_node = (set(mc.ls(type='type')) - set(pre_existing_types)).pop()
     transform = mc.listConnections(f'{type_node}.transformMessage')[0]
     return transform, type_node
 
