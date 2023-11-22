@@ -68,8 +68,8 @@ OPEN_MAYA_TANGENT_TYPES = {
 
 def get_scene_frames():
     return list(range(
-        int(mc.playbackOptions(query=True, min=True)),
-        int(mc.playbackOptions(query=True, max=True) + 1)))
+        int(mc.playbackOptions(query=True, animationStartTime=True)),
+        int(mc.playbackOptions(query=True, animationEndTime=True) + 1)))
 
 
 def get_anim_curves():
