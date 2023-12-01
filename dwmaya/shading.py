@@ -23,7 +23,6 @@ EXCLUDES_FROM_SHADING_HISTORY = [
 ]
 
 
-
 def get_materials_assignments():
     """
     Build a dictionnary listing the object by shading engine.
@@ -127,6 +126,7 @@ def clear_materials_assignments(shading_engines):
 
 @contextmanager
 def temp_default_material():
+    """Does not work for objects without any material"""
     assignments = get_materials_assignments()
     try:
         for shading_engine, nodes in assignments.items():
