@@ -23,6 +23,7 @@ EXCLUDES_FROM_SHADING_HISTORY = [
 ]
 
 
+
 def get_materials_assignments():
     """
     Build a dictionnary listing the object by shading engine.
@@ -34,7 +35,8 @@ def get_materials_assignments():
 
 
 def get_transform_childs_materials_assignments(
-        transform, relative_path=False, preserve_namespaces=False):
+        transform, relative_path=False, preserve_namespaces=False,
+        component_assignments=False):
     """
     Build a dictionnary listing the objects by shading engine. Objects are
     filtered from a transform parent. The path are stored relatively from that
@@ -61,8 +63,13 @@ def get_transform_childs_materials_assignments(
     if content is None:
         return {}
 
+    def _mesh_or_parent(mesh):
+        if not component_assignments or not re.search(r'.*\..*\[.*\]', mesh):
+            return mesh
+        return mc.listRelatives(mesh, parent=True, fullPath=True)[0]
+
     assignments = {
-        sg: [mesh for mesh in meshes if mesh in content]
+        sg: [mesh for mesh in meshes if _mesh_or_parent(mesh) in content]
         for sg, meshes in get_materials_assignments().items()}
 
     if relative_path:
