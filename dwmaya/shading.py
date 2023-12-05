@@ -15,7 +15,7 @@ from dwmaya.history import list_full_history
 from dwmaya.namespace import strip_namespaces
 
 
-UDIM_EXTENSION_PATTERN = r'\.1001\..{2,4}$'
+UDIM_EXTENSION_PATTERN = r'^.*\.1001\..{2,4}$'
 UDIM_UV_PATTERN = r'_u<u>_v<v>'
 UDIM_UV_RE_PATTERN = r'_u\d_v\d'
 EXCLUDES_FROM_SHADING_HISTORY = [
