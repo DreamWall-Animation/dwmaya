@@ -6,6 +6,7 @@ import tempfile
 from contextlib import contextmanager
 
 import maya.cmds as mc
+import maya.mel as mm
 
 from dwmaya.hierarchy import temporarily_reparent_transform_children
 from dwmaya.node import temporary_nodename
@@ -22,6 +23,14 @@ def check_if_scene_is_saved(check_modified=True):
         if mc.file(query=True, modified=True):
             raise ValueError('Scene is modified, please save.')
     return scene_path
+
+
+def open_scene_with_preload_editor(file_path, force=False):
+    file_path = file_path.replace('\\', '/')
+    mc.file(file_path, buildLoadSettings=True, open=True, force=force)
+    mm.eval(f'addRecentFile "{file_path}" "mayaAscii"')
+    mc.optionVar(stringValue=('preloadRefEdTopLevelFile', file_path))
+    mm.eval('PreloadReferenceEditor')
 
 
 @contextmanager
