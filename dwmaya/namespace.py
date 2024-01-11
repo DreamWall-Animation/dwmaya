@@ -9,12 +9,12 @@ from contextlib import contextmanager
 import maya.cmds as mc
 
 
-def get_non_existing_namespace(prefix='dw'):
-    i = 0
-    namespace = '%s%i' % (prefix, i)
+def get_non_existing_namespace(prefix='dw', start=0):
+    i = start
+    namespace = f'{prefix}_{i:02d}'
     while namespace in mc.namespaceInfo(listNamespace=True):
         i += 1
-        namespace = '%s%i' % (prefix, i)
+        namespace = f'{prefix}_{i:02d}'
     return namespace
 
 
