@@ -194,7 +194,8 @@ def get_udim_filepaths(path):
     extension = os.path.splitext(path)[-1]
     path_start_length = None
     if re.compile(UDIM_EXTENSION_PATTERN).match(path):
-        path_start_length = path.lower().index('1001' + extension)
+        path_start_length = len(path) - len(
+            re.match(r'^(.*?)(\d{4})', path[::-1]).group(0)[::-1])
     elif UDIM_UV_PATTERN in path.lower():
         path_start_length = path.lower().index(UDIM_UV_PATTERN)
     elif re.compile('.*' + UDIM_UV_RE_PATTERN + '.*').match(path):
