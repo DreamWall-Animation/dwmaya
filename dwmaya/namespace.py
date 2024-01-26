@@ -83,3 +83,17 @@ def maya_namespace(
     finally:
         if restore_current_namespace:
             mc.namespace(setNamespace=initial_namespace)
+
+
+def set_hierarchy_namespace(node, namespace):
+    """Apply namespace to entire transform hierarchy
+    """
+    if not mc.namespace(exists=namespace):
+        namespace = mc.namespace(add=namespace)
+
+    name = f'{namespace}:{node.split("|")[-1].split(":")[-1]}'
+    node = mc.rename(node, name)
+    children = mc.listRelatives(node, children=True, fullPath=True) or []
+    for child in children:
+        set_hierarchy_namespace(child, namespace)
+    return node
