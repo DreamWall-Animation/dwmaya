@@ -211,7 +211,7 @@ def list_texture_filepaths(shading_engines):
     textures = []
     for attribute in list_texture_attributes(shading_engines):
         try:
-            filepath = mc.getAttr(attribute)
+            filepath = os.path.expandvars(mc.getAttr(attribute))
             if filepath:
                 udim_paths = get_udim_filepaths(filepath)
                 if udim_paths:
