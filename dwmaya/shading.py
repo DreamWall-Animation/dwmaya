@@ -202,8 +202,12 @@ def get_udim_filepaths(path):
         path_start_length = len(re.split(UDIM_UV_RE_PATTERN, path)[0])
     if path_start_length:
         pattern = path[:path_start_length] + '*' + extension
-        for path in glob.glob(pattern):
-            udim_paths.append(path.replace('\\', '/'))
+        for match_file in glob.glob(os.path.expandvars(pattern)):
+            # We preserve original folder name to keep environment variables in
+            # the path.
+            match_file = (
+                f'{os.path.dirname(path)}/{os.path.basename(match_file)}')
+            udim_paths.append(match_file.replace('\\', '/'))
     return udim_paths
 
 
@@ -211,7 +215,7 @@ def list_texture_filepaths(shading_engines):
     textures = []
     for attribute in list_texture_attributes(shading_engines):
         try:
-            filepath = os.path.expandvars(mc.getAttr(attribute))
+            filepath = mc.getAttr(attribute)
             if filepath:
                 udim_paths = get_udim_filepaths(filepath)
                 if udim_paths:
