@@ -139,7 +139,7 @@ def switch_filepaths_in_maya_file(
                 f.write(line)
     if not overwrite_file:
         return clean
-    shutil.copy(clean, maya_file_path)
+    shutil.copy2(clean, maya_file_path)
     return maya_file_path
 
 
