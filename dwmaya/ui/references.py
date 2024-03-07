@@ -37,7 +37,10 @@ class ReferencesLister(QtWidgets.QWidget):
             cb.stateChanged.connect(func)
             self.table.setCellWidget(i, 0, cb)
 
-            namespace = mc.referenceQuery(ref_node, namespace=True)
+            try:
+                namespace = mc.referenceQuery(ref_node, namespace=True)
+            except RuntimeError:
+                namespace = ' - '
             item = QtWidgets.QTableWidgetItem(f' {namespace[1:]} ')
             self.table.setItem(i, 1, item)
 
