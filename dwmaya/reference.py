@@ -4,6 +4,7 @@ __license__ = 'MIT'
 
 
 import os
+import sys
 import glob
 from contextlib import contextmanager
 
@@ -11,7 +12,9 @@ import maya.cmds as mc
 
 from dwmaya.hierarchy import get_closest_to_root
 from dwmaya.node import temporary_nodename
-if not mc.about(batch=True):
+# if not mc.about(batch=True):
+#  => fix for `AttributeError: module 'maya.cmds' has no attribute 'about'`:
+if not os.path.basename(sys.executable).startswith('mayapy'):
     from dwmaya.ui.qt import chose_from_list_prompt
 
 
