@@ -127,6 +127,15 @@ def reset_pan_and_zoom(camera):
     mc.setAttr(f'{camera}.zoom', 1)
 
 
+def reset_camera(transform='persp'):
+    mc.camera(transform, edit=True, startupCamera=False)
+    mc.delete(transform)
+    new_transform, _ = mc.camera()
+    mc.hide(new_transform)
+    mc.reorder(new_transform, front=True)
+    mc.rename(new_transform, transform)
+
+
 @contextmanager
 def disable_panzoom_ctx(camera):
     initial_panzoom_state = mc.getAttr(f'{camera}.panZoomEnabled')
