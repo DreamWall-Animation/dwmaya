@@ -1,4 +1,5 @@
 import os
+from functools import partial
 
 from PySide2 import QtWidgets, QtCore
 from PySide2.QtGui import QShowEvent
@@ -29,12 +30,9 @@ class ReferencesLister(QtWidgets.QWidget):
         self.table.setHorizontalHeaderLabels([
             '', 'namespace', 'node', 'file name', 'file path'])
         for i, ref_node in enumerate(reference_nodes):
-            def func(load):
-                set_reference_loaded(ref_node, load)
-
             loaded = mc.referenceQuery(ref_node, isLoaded=True)
             cb = QtWidgets.QCheckBox(checked=loaded)
-            cb.stateChanged.connect(func)
+            cb.stateChanged.connect(partial(self.set_load_state, ref_node))
             self.table.setCellWidget(i, 0, cb)
 
             try:
@@ -54,16 +52,16 @@ class ReferencesLister(QtWidgets.QWidget):
 
         self.table.resizeColumnsToContents()
 
+    def set_load_state(self, refnode, load):
+        load = bool(load)
+        if load:
+            mc.file(loadReference=refnode)
+        else:
+            mc.file(unloadReference=refnode, force=True)
+
     def showEvent(self, event: QShowEvent) -> None:
         self.fill()
         return super().showEvent(event)
-
-
-def set_reference_loaded(refnode, load=True):
-    if load:
-        mc.file(loadReference=refnode)
-    else:   
-        mc.file(unloadReference=refnode, force=True)
 
 
 if __name__ == '__main__':
