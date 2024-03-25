@@ -66,10 +66,13 @@ class ReferencesLister(QtWidgets.QTableWidget):
 
     def set_load_state(self, refnode, load):
         load = bool(load)
-        if load:
-            mc.file(loadReference=refnode)
-        else:
-            mc.file(unloadReference=refnode, force=True)
+        try:
+            if load:
+                mc.file(loadReference=refnode, prompt=False)
+            else:
+                mc.file(unloadReference=refnode, force=True, prompt=False)
+        except BaseException:
+            pass  # avoid scene loading errors to stop scripts
 
     def set_selection_load_state(self, load):
         rows = {i.row() for i in self.selectedIndexes()}
