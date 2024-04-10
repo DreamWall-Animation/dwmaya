@@ -4,6 +4,7 @@ __license__ = 'MIT'
 
 
 import json
+import math
 from functools import partial
 from contextlib import contextmanager
 
@@ -552,3 +553,50 @@ def bake_animation(
             oma.MFnAnimCurve.kTangentStepNext,
             oma.MFnAnimCurve.kTangentStep,
             False)
+
+
+def add_pre_post_roll(
+        anim_curves=None, start=None, end=None, pre_frames=10, post_frames=10):
+    """
+    On each curve, add a key at the the preroll and post roll frames.
+    Set their value to follow the tangent of the first/last key.
+    """
+    anim_curves = anim_curves or get_anim_curves()
+    start = start or mc.playbackOptions(query=True, animationStartTime=True)
+    pre_frame = start - pre_frames
+    end = end or mc.playbackOptions(query=True, animationEndTime=True)
+    post_frame = end + post_frames
+    time_unit = om.MTime.uiUnit()
+    for i, curve_name in enumerate(anim_curves):
+        om_curve = get_openmaya_curve(curve_name)
+        om2_curve = node_names_to_mfn_anim_curves([curve_name])[0]
+        if om_curve.isStatic():
+            continue
+        # Pre-roll:
+        first_frame = om_curve.time(0).value()
+        delta = first_frame - pre_frame
+        if delta > 0:
+            value = om_curve.value(0)
+            angle = om2_curve.getTangentAngleWeight(0, False)[0].value
+            if angle != 0:
+                offset = math.sin(angle) / math.cos(angle) * delta
+                om_curve.addKey(
+                    om.MTime(pre_frame, time_unit),
+                    value - offset,
+                    oma2.MFnAnimCurve.kTangentLinear,
+                    oma2.MFnAnimCurve.kTangentLinear)
+        # Post-roll:
+        i = om_curve.numKeys() - 1
+        last_frame = om_curve.time(i).value()
+        delta = post_frame - last_frame
+        if delta > 0:
+            value = om_curve.value(i)
+            om2_curve = node_names_to_mfn_anim_curves([curve_name])[0]
+            angle = om2_curve.getTangentAngleWeight(i, True)[0].value
+            if angle != 0:
+                offset = math.sin(angle) / math.cos(angle) * delta
+                om_curve.addKey(
+                    om.MTime(post_frame, time_unit),
+                    value + offset,
+                    oma2.MFnAnimCurve.kTangentLinear,
+                    oma2.MFnAnimCurve.kTangentLinear)
