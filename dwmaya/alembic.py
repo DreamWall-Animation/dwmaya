@@ -18,7 +18,7 @@ def export_nodes_to_alembic(start, end, roots, filepath, frame_sample=1):
         f'AbcExport -j "-frameRange {start} {end}'
         f' -frameRelativeSample -{frame_sample} '
         '-frameRelativeSample 0 -worldSpace -ro'
-        ' -uvWrite -writeColorSets -writeFaceSets -writeUVSets -autoSubd'
+        ' -uvWrite -writeColorSets -writeFaceSets -writeUVSets'
         f' -dataFormat ogawa {roots} -file {filepath}";')
     mm.eval(command)
 
