@@ -579,7 +579,7 @@ def add_pre_post_roll(
             value = om_curve.value(0)
             angle = om2_curve.getTangentAngleWeight(0, False)[0].value
             if angle != 0:
-                offset = math.sin(angle) / math.cos(angle) * delta
+                offset = math.tan(angle) * delta
                 om_curve.addKey(
                     om.MTime(pre_frame, time_unit),
                     value - offset,
@@ -594,7 +594,7 @@ def add_pre_post_roll(
             om2_curve = node_names_to_mfn_anim_curves([curve_name])[0]
             angle = om2_curve.getTangentAngleWeight(i, True)[0].value
             if angle != 0:
-                offset = math.sin(angle) / math.cos(angle) * delta
+                offset = math.tan(angle) * delta
                 om_curve.addKey(
                     om.MTime(post_frame, time_unit),
                     value + offset,
