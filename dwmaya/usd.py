@@ -60,7 +60,8 @@ def reference_usd(
         transform=None, matrix=None):
     prim = stage.DefinePrim(scene_path)
     prim.SetInstanceable(instancable)
-    prim.GetReferences().AddReference(usd_path)
+    if usd_path:
+        prim.GetReferences().AddReference(usd_path)
     if matrix:
         set_matrix(prim, matrix)
     if transform:
@@ -73,7 +74,7 @@ def create_usd_hierarchy(stage, parent_path, data):
         scene_path = f'{parent_path}/{ref["name"]}'
         reference_usd(
             stage=stage,
-            usd_path=ref['path'],
+            usd_path=ref.get('path'),
             scene_path=scene_path,
             instancable=not ref.get('children'),
             transform=ref.get('transform'),
@@ -118,10 +119,12 @@ def show_in_usdview(usd_path):
 
 
 if __name__ == '__main__':
+    test_dir = f'{os.environ["USERPROFILE"]}'
+    cube_path = f'{test_dir}/cube.usdc'
     hierarchy = [
         dict(
             name='hello',
-            path='cube.usdc',
+            path=cube_path,
             matrix=[
                 1.0, 0.0, 0.0, 0.0, 0.0, 0.7071067811865475,
                 0.7071067811865476, 0.0, 0.0, -0.7071067811865476,
@@ -129,15 +132,15 @@ if __name__ == '__main__':
         ),
         dict(
             name='hello2',
-            path='cube.usdc',
+            path=cube_path,
             children=[
                 dict(
                     name='hello3',
-                    path='cube.usdc',
+                    path=cube_path,
                     transform=[[4, 5, 6], [40, 5, -20], [1, 2, 0.5]],
                 ),
             ],
         ),
     ]
-    path = create_assembly(hierarchy, 'test.usda')
+    path = create_assembly(hierarchy, f'{test_dir}/test.usda')
     show_in_usdview(path)
