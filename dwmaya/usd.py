@@ -58,7 +58,7 @@ def set_matrix(prim, matrix):
 def reference_usd(
         stage, usd_path, scene_path, instancable=True,
         transform=None, matrix=None):
-    prim = stage.DefinePrim(scene_path)
+    prim = stage.DefinePrim(scene_path, 'Xform')
     prim.SetInstanceable(instancable)
     if usd_path:
         prim.GetReferences().AddReference(usd_path)
@@ -132,7 +132,8 @@ if __name__ == '__main__':
         ),
         dict(
             name='hello2',
-            path=cube_path,
+            # path=cube_path,
+            transform=[[4, 5, 6], [40, 5, -20], [1, 2, 0.5]],
             children=[
                 dict(
                     name='hello3',
