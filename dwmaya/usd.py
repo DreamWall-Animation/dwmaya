@@ -7,7 +7,7 @@ import os
 import tempfile
 import subprocess
 
-from pxr import Usd, UsdGeom, Gf
+from pxr import Usd, UsdGeom, Gf, Sdf
 import maya.cmds as mc
 
 
@@ -57,7 +57,7 @@ def set_matrix(prim, matrix):
 
 def reference_usd(
         stage, usd_path, scene_path, instancable=True,
-        transform=None, matrix=None):
+        transform=None, matrix=None, custom_attributes=None):
     prim = stage.DefinePrim(scene_path, 'Xform')
     prim.SetInstanceable(instancable)
     if usd_path:
@@ -66,6 +66,10 @@ def reference_usd(
         set_matrix(prim, matrix)
     if transform:
         set_transform(prim, *transform)
+    if custom_attributes:
+        for attribute_name, (data_type, value) in custom_attributes.items():
+            attribute = prim.CreateAttribute(attribute_name, data_type)
+            attribute.Set(value)
     return prim
 
 
@@ -79,6 +83,7 @@ def create_usd_hierarchy(stage, parent_path, data):
             instancable=not ref.get('children'),
             transform=ref.get('transform'),
             matrix=ref.get('matrix'),
+            custom_attributes=ref.get('custom_attributes'),
         )
         children = ref.get('children', [])
         if children:
@@ -139,6 +144,10 @@ if __name__ == '__main__':
                     name='hello3',
                     path=cube_path,
                     transform=[[4, 5, 6], [40, 5, -20], [1, 2, 0.5]],
+                    custom_attributes=dict(
+                        my_float_attr=(Sdf.ValueTypeNames.Float, 3.141592),
+                        me_string_attr=(Sdf.ValueTypeNames.String, ':)'),
+                    )
                 ),
             ],
         ),
