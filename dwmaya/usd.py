@@ -42,6 +42,17 @@ def export_geo_usd(path):
         options=options)
 
 
+def import_geo_usd(path, parent):
+    mc.loadPlugin('mayaUsdPlugin', quiet=True)
+    content = mc.file(
+        path, type="USD Import", i=True, returnNewNodes=True)
+    transforms = mc.ls(content, type='transform')
+    roots = [t for t in transforms if not mc.listRelatives(t, parent=True)]
+    if not roots:
+        raise ValueError(f'Usd file is empty: {path}')
+    return mc.parent(roots, parent)
+
+
 def set_transform(prim, position, rotation, scale):
     UsdGeom.XformCommonAPI(prim).SetTranslate(position)
     UsdGeom.XformCommonAPI(prim).SetRotate(rotation)
