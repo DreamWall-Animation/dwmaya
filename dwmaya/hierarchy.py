@@ -136,3 +136,9 @@ def temporarily_reparent_transform_children(transform, parent=None):
     finally:
         if result:
             mc.parent(result, transform)
+
+
+def reorder_children_alphabetically(transform):
+    children = mc.listRelatives(transform, children=True) or []
+    for child in sorted(children, reverse=True):
+        mc.reorder(child, front=True)
