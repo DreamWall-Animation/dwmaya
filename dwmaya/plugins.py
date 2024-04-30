@@ -7,8 +7,8 @@ import os
 import maya.cmds as mc
 
 
-def load_plugin(plugin_name):
-    mc.loadPlugin(plugin_name, quiet=True)
+def load_plugin(plugin_name, quiet=True):
+    mc.loadPlugin(plugin_name, quiet=quiet)
 
 
 def remove_autoloads(excludes=None):

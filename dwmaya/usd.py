@@ -10,13 +10,18 @@ import subprocess
 from pxr import Usd, UsdGeom, Gf, Sdf
 import maya.cmds as mc
 from dwmaya.plugins import ensure_plugin_loaded
+from dwmaya.selection import preserve_selection
 
 CREATE_NO_WINDOW = 0x08000000
 USDVIEW_PATH = os.path.join(os.environ['USD_LOCATION'], 'bin', 'usdview')
 
 
+@preserve_selection
 @ensure_plugin_loaded('mayaUsdPlugin')
-def export_geo_usd(path):
+def export_geo_usd(path, roots=None):
+    """
+    roots: list of nodes, if None, the entire scene is exported.
+    """
     options = [
         'exportUVs=1',
         'exportSkels=none',
@@ -37,19 +42,24 @@ def export_geo_usd(path):
         'stripNamespaces=1',
     ]
     options = ';'.join(options)
+    if roots:
+        mc.select(roots)
     mc.file(
-        path, typ='USD Export', force=True, exportSelected=True,
+        path,
+        typ='USD Export',
+        force=True,
+        exportSelected=bool(roots),
         options=options)
 
 
 @ensure_plugin_loaded('mayaUsdPlugin')
-def import_geo_usd(path, parent):
+def import_geo_usd(usd_path, parent):
     content = mc.file(
-        path, type="USD Import", i=True, returnNewNodes=True)
+        usd_path, type="USD Import", i=True, returnNewNodes=True)
     transforms = mc.ls(content, type='transform')
     roots = [t for t in transforms if not mc.listRelatives(t, parent=True)]
     if not roots:
-        raise ValueError(f'Usd file is empty: {path}')
+        raise ValueError(f'Usd file is empty: {usd_path}')
     return mc.parent(roots, parent)
 
 
@@ -118,11 +128,15 @@ def create_assembly(hierarchy, assembly_path=None):
 
 
 @ensure_plugin_loaded('mayaUsdPlugin')
-def create_maya_usd_proxy(usd_path):
+def create_maya_usd_proxy(usd_path, parent=None):
     """Create node to display it in Maya."""
     proxy_shape = mc.createNode('mayaUsdProxyShape')
     mc.setAttr(proxy_shape + '.filePath', usd_path, type='string')
     mc.connectAttr('time1.outTime', proxy_shape + '.time')
+    if parent:
+        usd_proxy_transform = mc.listRelatives(proxy_shape, parent=True)[0]
+        mc.parent(usd_proxy_transform, parent)
+    return proxy_shape
 
 
 def show_in_usdview(usd_path):
