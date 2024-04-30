@@ -59,7 +59,7 @@ def list_plugin_nodes(plugin_name):
         return []
 
 
-def ensure_plugin_loaded(*plugin_names):
+def ensure_plugin_loaded(*plugin_names, quiet=True):
     """
     Decorator which ensure the given plugins are
     loaded on the function execution.
@@ -72,7 +72,7 @@ def ensure_plugin_loaded(*plugin_names):
         def decorator(*args, **kwargs):
             for plugin_name in plugin_names:
                 if not mc.pluginInfo(plugin_name, query=True, loaded=True):
-                    load_plugin(plugin_name)
+                    load_plugin(plugin_name, quiet=quiet)
             return func(*args, **kwargs)
         return decorator
     return wrap

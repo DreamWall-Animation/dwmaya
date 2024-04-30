@@ -9,14 +9,14 @@ import subprocess
 
 from pxr import Usd, UsdGeom, Gf, Sdf
 import maya.cmds as mc
-
+from dwmaya.plugins import ensure_plugin_loaded
 
 CREATE_NO_WINDOW = 0x08000000
 USDVIEW_PATH = os.path.join(os.environ['USD_LOCATION'], 'bin', 'usdview')
 
 
+@ensure_plugin_loaded('mayaUsdPlugin')
 def export_geo_usd(path):
-    mc.loadPlugin('mayaUsdPlugin', quiet=True)
     options = [
         'exportUVs=1',
         'exportSkels=none',
@@ -42,8 +42,8 @@ def export_geo_usd(path):
         options=options)
 
 
+@ensure_plugin_loaded('mayaUsdPlugin')
 def import_geo_usd(path, parent):
-    mc.loadPlugin('mayaUsdPlugin', quiet=True)
     content = mc.file(
         path, type="USD Import", i=True, returnNewNodes=True)
     transforms = mc.ls(content, type='transform')
@@ -117,9 +117,9 @@ def create_assembly(hierarchy, assembly_path=None):
     return assembly_path
 
 
+@ensure_plugin_loaded('mayaUsdPlugin')
 def create_maya_usd_proxy(usd_path):
-    # Create node to display it in Maya:
-    import maya.cmds as mc
+    """Create node to display it in Maya."""
     proxy_shape = mc.createNode('mayaUsdProxyShape')
     mc.setAttr(proxy_shape + '.filePath', usd_path, type='string')
     mc.connectAttr('time1.outTime', proxy_shape + '.time')
