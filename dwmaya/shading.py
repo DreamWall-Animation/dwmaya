@@ -103,8 +103,6 @@ def apply_materials_assignment_to_transfom_childs(
         meshes = [
             '|{0}|{1}'.format(transform.strip('|'), m.strip('|'))
             for m in meshes]
-        import pprint
-        pprint.pprint((shading_engine, meshes))
         if skip_missing_objects:
             meshes = [m for m in meshes if mc.objExists(m)]
         assign_material(shading_engine, meshes)
