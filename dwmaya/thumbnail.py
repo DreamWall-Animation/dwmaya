@@ -13,7 +13,7 @@ def create_node_thumbnail(node, size):
     mc.isolateSelect(panel, removeSelected=True)
     mc.isolateSelect(panel, addDagObject=node)
     mc.viewFit(node)
-    vp_state = mc.isolateSelect(panel, state=vp_state)
+    mc.isolateSelect(panel, state=vp_state)
     return _render_thumbnail(size)
 
 

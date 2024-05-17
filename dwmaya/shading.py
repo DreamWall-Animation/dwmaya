@@ -33,15 +33,15 @@ def get_materials_assignments():
     return {sg: nodes for sg, nodes in assignments.items() if nodes}
 
 
-def get_mesh_shading_engine(mesh):
-    shading_engines = mc.listConnections(mesh, type='shadingEngine')
+def get_shape_shading_engine(shape):
+    shading_engines = mc.listConnections(shape, type='shadingEngine')
     if not shading_engines:
         return None
     return shading_engines[0]
 
 
-def list_mesh_textures(mesh):
-    shading_engine = get_mesh_shading_engine(mesh)
+def list_shape_textures(shape):
+    shading_engine = get_shape_shading_engine(shape)
     if not shading_engine:
         return []
     return list_texture_filepaths([shading_engine])

@@ -47,14 +47,19 @@ def preserve_selection(func):
 
 
 @contextmanager
-def preserve_selection_ctx():
+def preserve_selection_ctx(eval_deferred=False):
     """Context manager to preserve selection"""
     selection = mc.ls(selection=True)
     try:
         yield
     finally:
         if selection:
-            mc.select(selection, noExpand=True)
+            if eval_deferred:
+                mc.evalDeferred(
+                    f"mc.select({selection}, noExpand=True)",
+                    lowestPriority=True)
+            else:
+                mc.select(selection)
         else:
             mc.select(clear=True)
 

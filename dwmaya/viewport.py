@@ -8,9 +8,11 @@ from functools import partial
 from contextlib import contextmanager
 
 import maya.cmds as mc
+import maya.OpenMayaUI as omui
 
-from dwmaya.ui.qt import get_screen_size
 from dwmaya.attributes import get_attr, set_attr
+from dwmaya.selection import preserve_selection
+from dwmaya.ui.qt import get_screen_size
 
 
 DEFAULT_MODEL_EDITOR_KWARGS = dict(
@@ -137,6 +139,24 @@ def temp_ambient_occlusion(occlusion_settings=None):
         for attr, value in occlusion_settings.items():
             value = old_values[attr]
             set_attr(vp_node, attr, value)
+
+
+@preserve_selection
+def isolate_nodes(nodes):
+    active_view = omui.M3dView.active3dView().widget()
+    panel = omui.MQtUtil.fullName(int(active_view)).strip('|').split('|')[-1]
+    mc.isolateSelect(panel, state=True, query=True)
+    mc.isolateSelect(panel, state=True)
+    mc.select(mc.ls())
+    mc.isolateSelect(panel, removeSelected=True)
+    for node in nodes:
+        mc.isolateSelect(panel, addDagObject=node)
+
+
+def unisolate_active_view():
+    active_view = omui.M3dView.active3dView().widget()
+    panel = omui.MQtUtil.fullName(int(active_view)).strip('|').split('|')[-1]
+    mc.isolateSelect(panel, state=False)
 
 
 if __name__ == '__main__':
