@@ -130,6 +130,21 @@ def select_shape_transforms(func):
     return wrapper
 
 
+def select_transform_shapes(func):
+    '''
+    this decorator select all transforms instead of shapes
+    '''
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        shapes = mc.ls(selection=True, shapes=True) or []
+        transforms = mc.ls(selection=True, type='transform')
+        shapes.extend(mc.ls(mc.listRelatives(transforms), shapes=True))
+        mc.select(shapes)
+        result = func(*args, **kwargs)
+        return result
+    return wrapper
+
+
 def selection_contains_at_least(number, node_type):
     '''
     this decorqtor check if a maya selection contain at least the number of

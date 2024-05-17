@@ -94,7 +94,7 @@ def create_outmesh_copies(meshes=None):
     return copies
 
 
-def create_clean_copies(meshes=None):
+def create_clean_copies(meshes=None, suffix=STATIC_COPY_NAME):
     meshes = meshes or selected_meshes()
     copies = []
     for mesh in meshes:
@@ -103,7 +103,7 @@ def create_clean_copies(meshes=None):
         mc.refresh()
         mc.disconnectAttr(mesh + '.outMesh', copy + '.inMesh')
         transform = mc.listRelatives(mesh, parent=True)[0]
-        copy = rename_mesh(copy, STATIC_COPY_NAME, reference_name=transform)
+        copy = rename_mesh(copy, suffix, reference_name=transform)
         copies.append(copy)
     return copies
 
