@@ -228,3 +228,23 @@ def reset_meshes_vertices(meshes, treshold=0.0001):
     for mesh in meshes:
         reset_mesh_vertices(mesh)
     return True
+
+
+def create_uv_mesh(mesh):
+    """
+    Create a physical mesh with vertex positions corresponding to UV
+    cordinates.
+    """
+    dagpath = om2.MSelectionList().add(mesh).getDagPath(0)
+    mesh_it = om2.MItMeshVertex(dagpath)
+
+    copy = create_clean_copies([mesh])[0]
+    dagpath = om2.MSelectionList().add(copy).getDagPath(0)
+    mfn_mesh = om2.MFnMesh(dagpath)
+
+    while not mesh_it.isDone():
+        u, v = mesh_it.getUV()
+        point = om2.MPoint(u, 0, v)
+        mfn_mesh.setPoint(mesh_it.index(), point)
+        mesh_it.next()
+    return copy
