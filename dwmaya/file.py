@@ -3,6 +3,7 @@ import re
 import shutil
 import codecs
 import tempfile
+from datetime import datetime as Datetime
 from contextlib import contextmanager
 
 import maya.cmds as mc
@@ -11,6 +12,9 @@ import maya.mel as mm
 from dwmaya.hierarchy import temporarily_reparent_transform_children
 from dwmaya.node import temporary_nodename
 from dwmaya.selection import preserve_selection
+
+
+MAYA_ASCII_DATE_PREFIX = '//Last modified: '
 
 
 def check_if_scene_is_saved(check_modified=True):
@@ -141,6 +145,30 @@ def switch_filepaths_in_maya_file(
         return clean
     shutil.copy2(clean, maya_file_path)
     return maya_file_path
+
+
+def maya_dateformat_to_datetime(maya_ascii_date):
+    """
+    Example:
+    //Last modified: Tue, May 07, 2024 11:27:08 AM
+    """
+    datetime = maya_ascii_date.split(MAYA_ASCII_DATE_PREFIX)[-1]
+    _, month, day, year, time, period = datetime.strip().split(' ')
+    datetime = f'{year} {month} {day[:-1]} {time} {period}'
+    try:
+        return Datetime.strptime(datetime, '%Y %b %d %I:%M:%S %p')
+    except:
+        print(f'Could not parse "{datetime}"')
+        raise
+
+
+def get_maya_ascii_scene_date(maya_scene_path):
+    with codecs.open(maya_scene_path, 'r', encoding='iso-8859-1') as mayascii:
+        for line in mayascii:
+            if line.startswith(MAYA_ASCII_DATE_PREFIX):
+                return maya_dateformat_to_datetime(line)
+            if not line.startswith('//'):
+                raise Exception('Date not found.')
 
 
 @preserve_maya_scenename
