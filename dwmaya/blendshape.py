@@ -17,7 +17,8 @@ def create_multitarget_blendshape(bases, targets):
             blendshape_set = mc.ls(connections, type='objectSet')[0]
         else:
             parent = mc.listRelatives(base, parent=True, fullPath=True)
-            neightbourgs = mc.listRelatives(parent, type=("nurbsCurve", "mesh"), fullPath=True)
+            types = ("nurbsCurve", "mesh")
+            neightbourgs = mc.listRelatives(parent, type=types, fullPath=True)
             mc.sets(neightbourgs, add=blendshape_set)
             mc.blendShape(
                 blendshape,
