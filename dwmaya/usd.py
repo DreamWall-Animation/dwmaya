@@ -42,14 +42,15 @@ def export_geo_usd(path, roots=None):
         'stripNamespaces=1',
     ]
     options = ';'.join(options)
-    if roots:
-        mc.select(roots)
-    mc.file(
-        path,
+    kwargs = dict(
+        defaultExtensions=False,
         typ='USD Export',
         force=True,
-        exportSelected=bool(roots),
         options=options)
+    if roots:
+        mc.select(roots)
+        kwargs['exportSelected'] = True
+    mc.file(path, **kwargs)
 
 
 @ensure_plugin_loaded('mayaUsdPlugin')
