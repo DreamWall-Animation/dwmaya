@@ -114,6 +114,9 @@ def apply_materials_assignment_to_transfom_childs(
                 for mesh in meshes]
         if materials_namespace:
             shading_engine = f'{materials_namespace}:{shading_engine}'
+        if not mc.objExists(shading_engine):
+            print(f'Warning: Missing shading engine: {shading_engine}')
+            continue
         meshes = [
             '|{0}|{1}'.format(transform.strip('|'), m.strip('|'))
             for m in meshes]
