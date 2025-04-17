@@ -527,7 +527,26 @@ def get_openmaya_curve(curve_name):
 
 def is_curve_connected(curve_name):
     omaya_curve = get_openmaya_curve(curve_name)
-    return omaya_curve.findPlug("output", False).destinations()
+    r = om.MPlugArray()
+    return omaya_curve.findPlug('output', False).destinations(r)
+
+
+def get_connected_nodes(curve_name):
+    omaya_curve = get_openmaya_curve(curve_name)
+    dest_plugs = om.MPlugArray()
+    omaya_curve.findPlug('output', False).destinations(dest_plugs)
+
+    connected_nodes = []
+
+    for i in range(dest_plugs.length()):
+        dest_plug = dest_plugs[i]
+        node = dest_plug.node()
+        dep_fn = om.MFnDependencyNode(node)
+        node_name = dep_fn.name()
+        node_type = dep_fn.typeName()
+        connected_nodes.append((node_name, node_type))
+
+    return connected_nodes
 
 
 def bake_animation(
