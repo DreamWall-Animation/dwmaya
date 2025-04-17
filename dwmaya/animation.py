@@ -525,6 +525,11 @@ def get_openmaya_curve(curve_name):
     return oma.MFnAnimCurve(mobj)
 
 
+def is_curve_connected(curve_name):
+    omaya_curve = get_openmaya_curve(curve_name)
+    return omaya_curve.findPlug("output", False).destinations()
+
+
 def bake_animation(
         anim_curves, frames, skip_static_curves=True,
         tangent_in='stepnext', tangent_out='step'):
