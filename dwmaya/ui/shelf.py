@@ -262,14 +262,6 @@ def create_menu(menu, mouse_button, command, shelf_button):
             'You cannot have both a left mouse button menu and a '
             'shelf button command.')
 
-    # HACK: the command menuItem's flag -sourceType is fucked up.
-    # It will always evaluate in Mel whatever the option set.
-    # This will will embed the given command in a python() proc.
-    for item in menu:
-        if item.get('source_type') == 'python':
-            command = 'python("{}")'.format(item['command'])
-            item['command'] = command
-
     if mouse_button == 1:
         popup_menu = mc.popupMenu(
             button=1, itemArray=True, parent=shelf_button)
@@ -279,10 +271,17 @@ def create_menu(menu, mouse_button, command, shelf_button):
                 mc.menuItem(divider=True)
                 continue
 
+            # HACK: the command menuItem's flag -sourceType is fucked up.
+            # It will always evaluate in Mel whatever the option set.
+            # This will will embed the given command in a python() proc.
+            if item.get('source_type') == 'python':
+                command = 'python("{}")'.format(item['command'])
+            else:
+                command = command
             kwargs = dict(
                 parent=popup_menu,
                 label=item['label'],
-                command=item['command'])
+                command=command)
 
             mc.menuItem(**kwargs)
 
