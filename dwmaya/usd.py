@@ -56,8 +56,6 @@ def export_geo_usd(path, roots=None):
 @preserve_selection
 @ensure_plugin_loaded('mayaUsdPlugin')
 def export_material_to_usd(usd_path, nodes):
-    if usd_path.endswith(('.usd', '.usda')):
-        usd_path = '.'.join(usd_path.split('.')[:-1])
     options = ';'.join([
         'exportUVs=1',
         'exportSkels=none',
@@ -102,6 +100,7 @@ def export_material_to_usd(usd_path, nodes):
         usd_path,
         force=True,
         type='USD Export',
+        defaultExtensions=False,
         exportSelected=True,
         options=options)
 
