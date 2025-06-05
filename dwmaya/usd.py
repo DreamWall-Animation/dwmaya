@@ -53,6 +53,59 @@ def export_geo_usd(path, roots=None):
     mc.file(path, **kwargs)
 
 
+@preserve_selection
+@ensure_plugin_loaded('mayaUsdPlugin')
+def export_material_to_usd(usd_path, nodes):
+    if usd_path.endswith(('.usd', '.usda')):
+        usd_path = '.'.join(usd_path.split('.')[:-1])
+    options = ';'.join([
+        'exportUVs=1',
+        'exportSkels=none',
+        'exportSkin=none',
+        'exportBlendShapes=0',
+        'exportDisplayColor=0',
+        'filterTypes=nurbsCurve',
+        'exportColorSets=1',
+        'exportComponentTags=1',
+        'defaultMeshScheme=catmullClark',
+        'animation=0',
+        'eulerFilter=0',
+        'staticSingleSample=0',
+        'startTime=1',
+        'endTime=1',
+        'frameStride=1',
+        'frameSample=0.0',
+        'defaultUSDFormat=usda',
+        'rootPrim=',
+        'rootPrimType=scope',
+        'defaultPrim=None',
+        'exportMaterials=1',
+        'shadingMode=useRegistry',
+        'convertMaterialsTo=[UsdPreviewSurface,rendermanForMaya,MaterialX]',
+        'exportAssignedMaterials=1',
+        'exportRelativeTextures=automatic',
+        'exportInstances=1',
+        'exportVisibility=0',
+        'mergeTransformAndShape=1',
+        'includeEmptyTransforms=1',
+        'stripNamespaces=0',
+        'worldspace=0',
+        'exportStagesAsRefs=1',
+        'upAxis=mayaPrefs',
+        'unit=mayaPrefs',
+        'jobContext=[Arnold]',
+        'excludeExportTypes=[Meshes,Cameras,Lights]',
+        'legacyMaterialScope=0'
+    ])
+    mc.select(nodes)
+    mc.file(
+        usd_path,
+        force=True,
+        type='USD Export',
+        exportSelected=True,
+        options=options)
+
+
 @ensure_plugin_loaded('mayaUsdPlugin')
 def import_geo_usd(usd_path, parent):
     content = mc.file(
