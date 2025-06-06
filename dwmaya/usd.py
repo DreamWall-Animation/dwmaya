@@ -18,91 +18,17 @@ USDVIEW_PATH = os.path.join(os.environ['USD_LOCATION'], 'bin', 'usdview')
 
 @preserve_selection
 @ensure_plugin_loaded('mayaUsdPlugin')
-def export_geo_usd(path, roots=None):
-    """
-    roots: list of nodes, if None, the entire scene is exported.
-    """
-    options = [
-        'exportUVs=1',
-        'exportSkels=none',
-        'exportSkin=none',
-        'exportBlendShapes=0',
-        'exportColorSets=1',
-        'defaultMeshScheme=none',
-        'defaultUSDFormat=usdc',
-        'eulerFilter=0',
-        'staticSingleSample=0',
-        'parentScope=',
-        'exportDisplayColor=1',
-        'shadingMode=useRegistry',
-        'convertMaterialsTo=UsdPreviewSurface',
-        'exportInstances=0',
-        'exportVisibility=0',
-        'mergeTransformAndShape=0',
-        'stripNamespaces=1',
-    ]
-    options = ';'.join(options)
+def export_to_usd(path, options: dict, nodes=None):
+    options = ';'.join(f'{key}={value}' for key, value in options.items())
     kwargs = dict(
         defaultExtensions=False,
         typ='USD Export',
         force=True,
         options=options)
-    if roots:
-        mc.select(roots)
+    if nodes:
+        mc.select(nodes)
         kwargs['exportSelected'] = True
     mc.file(path, **kwargs)
-
-
-@preserve_selection
-@ensure_plugin_loaded('mayaUsdPlugin')
-def export_material_to_usd(usd_path, nodes):
-    options = ';'.join([
-        'exportUVs=1',
-        'exportSkels=none',
-        'exportSkin=none',
-        'exportBlendShapes=0',
-        'exportDisplayColor=0',
-        'filterTypes=nurbsCurve',
-        'exportColorSets=1',
-        'exportComponentTags=1',
-        'defaultMeshScheme=catmullClark',
-        'animation=0',
-        'eulerFilter=0',
-        'staticSingleSample=0',
-        'startTime=1',
-        'endTime=1',
-        'frameStride=1',
-        'frameSample=0.0',
-        'defaultUSDFormat=usda',
-        'rootPrim=',
-        'rootPrimType=scope',
-        'defaultPrim=None',
-        'exportMaterials=1',
-        'shadingMode=useRegistry',
-        'convertMaterialsTo=[UsdPreviewSurface,rendermanForMaya,MaterialX]',
-        'exportAssignedMaterials=1',
-        'exportRelativeTextures=automatic',
-        'exportInstances=1',
-        'exportVisibility=0',
-        'mergeTransformAndShape=1',
-        'includeEmptyTransforms=1',
-        'stripNamespaces=0',
-        'worldspace=0',
-        'exportStagesAsRefs=1',
-        'upAxis=mayaPrefs',
-        'unit=mayaPrefs',
-        'jobContext=[Arnold]',
-        'excludeExportTypes=[Meshes,Cameras,Lights]',
-        'legacyMaterialScope=0'
-    ])
-    mc.select(nodes)
-    mc.file(
-        usd_path,
-        force=True,
-        type='USD Export',
-        defaultExtensions=False,
-        exportSelected=True,
-        options=options)
 
 
 @ensure_plugin_loaded('mayaUsdPlugin')
