@@ -31,6 +31,38 @@ def export_to_usd(path, options: dict, nodes=None):
     mc.file(path, **kwargs)
 
 
+@preserve_selection
+@ensure_plugin_loaded('mayaUsdPlugin')
+def export_geo_usd(path, roots=None):
+    """
+    roots: list of nodes, if None, the entire scene is exported.
+    """
+    options = dict(
+        exportUVs=1,
+        exportSkels='none',
+        exportSkin='none',
+        exportBlendShapes=0,
+        exportColorSets=1,
+        defaultMeshScheme='none',
+        defaultUSDFormat='usdc',
+        eulerFilter=0,
+        staticSingleSample=0,
+        parentScope='',
+        exportDisplayColor=1,
+        shadingMode='useRegistry',
+        convertMaterialsTo='UsdPreviewSurface',
+        exportInstances=0,
+        exportVisibility=0,
+        mergeTransformAndShape=0,
+        stripNamespaces=1,
+    )
+    options = ';'.join(options)
+    export_to_usd(path, options, roots)
+
+
+export_geo_to_usd = export_geo_usd
+
+
 @ensure_plugin_loaded('mayaUsdPlugin')
 def import_geo_usd(usd_path, parent):
     content = mc.file(
