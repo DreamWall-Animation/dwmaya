@@ -1,8 +1,58 @@
+import os
 import maya.cmds as mc
 import maya.mel as mm
 from dwmaya.plugins import ensure_plugin_loaded
 from dwmaya.shading import assign_material
 from functools import partial
+
+
+def import_texture_to_yeti_node(filepath, yeti_node):
+    texture_node = mc.pgYetiGraph(yeti_node, create=True, type='texture')
+    mc.pgYetiGraph(
+        yeti_node,
+        node=texture_node,
+        param='file_name',
+        setParamValueString=filepath)
+    mc.pgYetiGraph(
+        yeti_node,
+        node=texture_node,
+        param='vCoord',
+        setParamValueExpr="floor($t)+1-($t-floor($t))")
+    mc.pgYetiGraph(
+        yeti_node,
+        node=texture_node,
+        rename=os.path.splitext(os.path.basename(filepath))[0])
+
+
+def list_yeti_node_all_texture_files(yeti_node):
+    texture_nodes = mc.pgYetiGraph(yeti_node, listNodes=True, type='texture')
+    filepaths = set()
+    for texture_node in texture_nodes:
+        filepath = mc.pgYetiGraph(
+            yeti_node,
+            node=texture_node,
+            param='file_name',
+            getParamValue=True)
+        if not filepath:
+            continue
+        filepaths.add(filepath)
+    return filepaths
+
+
+def replace_yeti_node_texture(src, dst, yeti_node):
+    texture_nodes = mc.pgYetiGraph(yeti_node, listNodes=True, type='texture')
+    for texture_node in texture_nodes:
+        filepath = mc.pgYetiGraph(
+            yeti_node,
+            node=texture_node,
+            param='file_name',
+            getParamValue=True)
+        if filepath == src:
+            filepath = mc.pgYetiGraph(
+                yeti_node,
+                node=texture_node,
+                param='file_name',
+                setParamValueString=dst)
 
 
 @ensure_plugin_loaded('pgYetiMaya')
