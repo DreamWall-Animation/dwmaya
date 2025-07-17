@@ -37,6 +37,15 @@ def create_yeti_on_meshes(meshes=None):
         yeti_node = create_yeti_node(name=name)
         yeti_nodes.append(yeti_node)
         mm.eval(f'pgYetiAddGeometry("{mesh}", "{yeti_node}")')
+        import_node = mc.pgYetiGraph(yeti_node, create=True, type='import')
+        mc.pgYetiGraph(
+            yeti_node, node=import_node,
+            param='geometry',
+            setParamValueString=mesh)
+        mc.pgYetiGraph(
+            yeti_node,
+            node=import_node,
+            rename=f'import_{mesh}')
     return yeti_nodes
 
 
