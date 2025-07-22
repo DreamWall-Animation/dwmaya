@@ -28,12 +28,24 @@ def selected_meshes():
 
 def rename_mesh(mesh, template, reference_name=None):
     transform = mc.listRelatives(mesh, parent=True)[0]
+    dependnode = om2.MSelectionList().add(mesh).getDependNode(0)
+    dagnode = om2.MFnDagNode(dependnode)
     reference_name = reference_name or transform
+
     id_ = 0
     name = template.format(transform=reference_name, id=str(id_).zfill(3))
+    if not mc.objExists(name):
+        mc.rename(transform, name)
+        return dagnode.name()
+
+    if '{id}' not in template:
+        template += '_{id}'
+
     while mc.objExists(name):
+        mc.refresh()
         id_ += 1
         name = template.format(transform=reference_name, id=str(id_).zfill(3))
+
     dependnode = om2.MSelectionList().add(mesh).getDependNode(0)
     dagnode = om2.MFnDagNode(dependnode)
     mc.rename(transform, name)

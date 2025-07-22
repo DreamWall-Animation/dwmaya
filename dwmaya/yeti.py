@@ -6,7 +6,12 @@ from dwmaya.shading import assign_material
 from functools import partial
 
 
+@ensure_plugin_loaded('pgYetiMaya')
 def import_texture_to_yeti_node(filepath, yeti_node):
+    existing_textures = list_yeti_node_all_texture_files(yeti_node)
+    if filepath in existing_textures:
+        return mc.warning('Texture already existing in yeti node network')
+
     texture_node = mc.pgYetiGraph(yeti_node, create=True, type='texture')
     mc.pgYetiGraph(
         yeti_node,
@@ -24,6 +29,7 @@ def import_texture_to_yeti_node(filepath, yeti_node):
         rename=os.path.splitext(os.path.basename(filepath))[0])
 
 
+@ensure_plugin_loaded('pgYetiMaya')
 def list_yeti_node_all_texture_files(yeti_node):
     texture_nodes = mc.pgYetiGraph(yeti_node, listNodes=True, type='texture')
     filepaths = set()
@@ -39,6 +45,7 @@ def list_yeti_node_all_texture_files(yeti_node):
     return filepaths
 
 
+@ensure_plugin_loaded('pgYetiMaya')
 def replace_yeti_node_texture(src, dst, yeti_node):
     texture_nodes = mc.pgYetiGraph(yeti_node, listNodes=True, type='texture')
     for texture_node in texture_nodes:
