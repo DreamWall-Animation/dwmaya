@@ -97,11 +97,11 @@ def create_yeti_on_meshes(meshes=None):
         yeti_nodes.append(yeti_node)
         parents.append(transform)
         mm.eval(f'pgYetiAddGeometry("{mesh}", "{yeti_node}")')
-        mc.evalDeferred(partial(create_import_node, yeti_node, mesh))
+        mc.evalDeferred(partial(import_mesh_to_yeti_graph, yeti_node, mesh))
     return parents, yeti_nodes
 
 
-def create_import_node(yeti_node, mesh):
+def import_mesh_to_yeti_graph(yeti_node, mesh):
     import_node = mc.pgYetiGraph(yeti_node, create=True, type='import')
     mc.pgYetiGraph(
         yeti_node, node=import_node,
@@ -111,6 +111,15 @@ def create_import_node(yeti_node, mesh):
         yeti_node,
         node=import_node,
         rename=f'imp_{mesh}')
+
+
+def list_all_yeti_nodes_children(parent):
+    yeti_nodes = mc.listRelatives(
+        parent, allDescendents=True, type='pgYetiMaya', fullPath=True) or []
+    grooms = mc.listRelatives(
+        parent, allDescendents=True, type='pgYetiGroom', fullPath=True) or []
+    yeti_nodes.extend(grooms)
+    return yeti_nodes
 
 
 if __name__ == '__main__':

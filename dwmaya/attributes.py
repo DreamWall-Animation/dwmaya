@@ -79,6 +79,11 @@ def attribute_name(node):
     return '.'.join(attributes)
 
 
+def node_name(plug):
+    node, _ = plug.split('.')
+    return node
+
+
 @contextmanager
 def temporarily_unlocked_attributes(node, attributes):
     try:
