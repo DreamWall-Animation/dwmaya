@@ -80,7 +80,7 @@ def attribute_name(node):
 
 
 def node_name(plug):
-    node, _ = plug.split('.')
+    node, *_ = plug.split('.')
     return node
 
 
