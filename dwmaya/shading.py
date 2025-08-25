@@ -23,14 +23,24 @@ EXCLUDES_FROM_SHADING_HISTORY = [
 ]
 
 
-def get_materials_assignments(full_paths=True):
+def get_materials_assignments(
+        full_paths=True, transforms=False, shaders=False):
     """
     Build a dictionnary listing the object by shading engine.
     """
     assignments = {
         sg: mc.ls(mc.sets(sg, query=True), long=full_paths)
         for sg in mc.ls(type='shadingEngine')}
-    return {sg: nodes for sg, nodes in assignments.items() if nodes}
+    assignments = {sg: nodes for sg, nodes in assignments.items() if nodes}
+    if transforms:
+        assignments = {
+            sg: mc.listRelatives(nodes, parent=True, fullPath=full_paths)
+            for sg, nodes in assignments.items()}
+    if shaders:
+        assignments = {
+            mc.listConnections(f'{sg}.surfaceShader')[0]: nodes
+            for sg, nodes in assignments.items()}
+    return assignments
 
 
 def get_shape_shading_engine(shape):
