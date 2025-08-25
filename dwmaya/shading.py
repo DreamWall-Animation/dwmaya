@@ -23,12 +23,12 @@ EXCLUDES_FROM_SHADING_HISTORY = [
 ]
 
 
-def get_materials_assignments():
+def get_materials_assignments(full_paths=True):
     """
     Build a dictionnary listing the object by shading engine.
     """
     assignments = {
-        sg: mc.ls(mc.sets(sg, query=True), long=True)
+        sg: mc.ls(mc.sets(sg, query=True), long=full_paths)
         for sg in mc.ls(type='shadingEngine')}
     return {sg: nodes for sg, nodes in assignments.items() if nodes}
 
