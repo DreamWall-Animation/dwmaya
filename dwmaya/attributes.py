@@ -8,14 +8,13 @@ import maya.cmds as mc
 from contextlib import contextmanager
 
 
-def lock_xform(node, keyable=None):
+def lock_xform(node, keyable=None, locked=True):
     tsr = ('t', 's', 'r')
     xyz = ('x', 'y', 'z')
     for op, axe in itertools.product(tsr, xyz):
         if keyable is not None:
             mc.setAttr(node + '.' + op + axe, keyable=keyable)
-        lock_attr(node, op + axe)
-        mc.setAttr(node + '.' + op + axe, lock=True)
+        mc.setAttr(f'{node}.{op + axe}', lock=locked)
 
 
 def connect_attr(source, destination):
