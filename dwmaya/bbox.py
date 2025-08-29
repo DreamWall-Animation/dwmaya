@@ -20,9 +20,9 @@ def create_bbox_curve(transform, color=None):
 
     shapes = []
     for i, (a, b) in enumerate(edges):
-        name = f'{transform}_bbox_{a.__qualname__}{b.__qualname__}'
+        name = f'{transform}_bbox_{i}'
         crv = mc.curve(d=1, p=[a, b], name=name)
-        shp = mc.listRelatives(crv, shape=True, allParents=True)[0]
+        shp = mc.listRelatives(crv, type='nurbsCurve')[0]
         mc.parent(shp, transform, shape=True, relative=True)
         mc.delete(crv)
         shapes.append(shp)
