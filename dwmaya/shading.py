@@ -34,7 +34,8 @@ def get_materials_assignments(
     assignments = {sg: nodes for sg, nodes in assignments.items() if nodes}
     if transforms:
         assignments = {
-            sg: mc.listRelatives(nodes, parent=True, fullPath=full_paths)
+            sg: mc.listRelatives(
+                nodes, parent=True, fullPath=full_paths, path=not full_paths)
             for sg, nodes in assignments.items()}
     if shaders:
         assignments = {
