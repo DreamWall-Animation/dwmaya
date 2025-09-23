@@ -4,11 +4,15 @@ __license__ = 'MIT'
 
 
 import os
-import shiboken2
 from functools import partial
 from contextlib import contextmanager
 
-from PySide2 import QtWidgets, QtCore, QtGui
+try:
+    from PySide6 import QtWidgets, QtCore, QtGui
+    import shiboken6 as shiboken
+except ModuleNotFoundError:
+    from PySide2 import QtWidgets, QtCore, QtGui
+    import shiboken2 as shiboken
 
 import maya.cmds as mc
 import maya.OpenMayaUI as omui
@@ -113,7 +117,7 @@ def get_maya_window():
         return None
     ptr = omui.MQtUtil.mainWindow()
     if ptr is not None:
-        return shiboken2.wrapInstance(int(ptr), QtWidgets.QWidget)
+        return shiboken.wrapInstance(int(ptr), QtWidgets.QWidget)
 
 
 def center_on_maya_window(widget):

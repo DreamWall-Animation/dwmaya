@@ -8,7 +8,11 @@ __license__ = 'MIT'
 
 
 import maya.cmds as mc
-from PySide2 import QtWidgets, QtCore
+try:
+    from PySide6 import QtWidgets, QtCore
+except ModuleNotFoundError:
+    from PySide2 import QtWidgets, QtCore
+
 from dwmaya.ui.qt import get_maya_window
 from dwmaya.ui.shelf import (
     registered_shelves, update, DEFAULT_SHELF, SHELVES_TO_LOAD)
@@ -79,4 +83,3 @@ def show_shelf_ui():
     if _shelf_ui is None:
         _shelf_ui = ShelfUi(parent=get_maya_window())
     _shelf_ui.show()
-
