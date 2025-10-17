@@ -129,8 +129,19 @@ def center_on_maya_window(widget):
 
 
 def get_screen_size():
-    rect = QtWidgets.QDesktopWidget().screenGeometry(-1)
-    scale = 96 / QtWidgets.QApplication.primaryScreen().logicalDotsPerInch()
+    app = QtWidgets.QApplication.instance()
+    try:
+        # PySide6
+        screen = app.primaryScreen()
+        rect = screen.geometry()
+        dpi = screen.logicalDotsPerInch()
+    except AttributeError:
+        # PySide2 fallback
+        desktop = QtWidgets.QDesktopWidget()
+        rect = desktop.screenGeometry(-1)
+        dpi = app.primaryScreen().logicalDotsPerInch()
+
+    scale = 96 / dpi
     return [int(rect.width() * scale), int(rect.height() * scale)]
 
 
