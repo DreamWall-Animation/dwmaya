@@ -5,8 +5,10 @@ __license__ = 'MIT'
 
 
 import maya.cmds as mc
+from dwmaya.deformer.tweak import ensure_deformation_tweak_creation
 
 
+@ensure_deformation_tweak_creation
 def create_multitarget_blendshape(bases, targets):
     blendshape = None
     blendshape_set = None

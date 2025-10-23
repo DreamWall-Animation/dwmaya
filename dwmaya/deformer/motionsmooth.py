@@ -1,5 +1,6 @@
 import maya.cmds as mc
 import maya.api.OpenMaya as om2
+from dwmaya.deformer.tweak import ensure_deformation_tweak_creation
 
 
 MOTION_SMOOTH_CACHE_BLENDSHAPE_NAME = '{}_motion_smooth_cache_BS'
@@ -71,6 +72,7 @@ def create_motionblend_mesh(base, aperture=1, samples=1, skip_center=False):
     return motion_blend
 
 
+@ensure_deformation_tweak_creation
 def bake_motion_smooth_cache(
         mesh, startframe=None, endframe=None, aperture=1, samples=1):
     """ function which bake the given range.
