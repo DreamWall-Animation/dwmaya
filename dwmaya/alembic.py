@@ -3,11 +3,13 @@ from pathlib import Path
 
 import maya.cmds as mc
 import maya.mel as mm
+from dwmaya.plugins import ensure_plugin_loaded
 
 
 IDENTITY = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
 
 
+@ensure_plugin_loaded('AbcExport')
 def export_nodes_to_alembic(start, end, roots, filepath, frame_sample=1):
     mc.loadPlugin('AbcExport', quiet=True)
     # Seems that alembic command does not support windows-like paths. Need to
@@ -23,6 +25,19 @@ def export_nodes_to_alembic(start, end, roots, filepath, frame_sample=1):
     mm.eval(command)
 
 
+@ensure_plugin_loaded('AbcImport')
+def import_geo_alembic(filepath, parent=None):
+    content = mc.file(filepath , i=True, returnNewNodes=True)
+    transforms = mc.ls(content, type='transform', long=True)
+    roots = [
+        t for t in transforms if
+        not mc.listRelatives(t, fullPath=True, parent=True)]
+    if not roots:
+        raise ValueError(f'Alembic file is empty: {filepath}')
+    return mc.ls(mc.parent(roots, parent), long=True)
+
+
+@ensure_plugin_loaded('AbcImport')
 def convert_gpu_caches_to_meshes(delete_caches=True):
     """
     Replace gpuCache nodes by importing the alembic files.

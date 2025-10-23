@@ -67,11 +67,13 @@ export_geo_to_usd = export_geo_usd
 def import_geo_usd(usd_path, parent):
     content = mc.file(
         usd_path, type="USD Import", i=True, returnNewNodes=True)
-    transforms = mc.ls(content, type='transform')
-    roots = [t for t in transforms if not mc.listRelatives(t, parent=True)]
+    transforms = mc.ls(content, type='transform', long=True)
+    roots = [
+        t for t in transforms if
+        not mc.listRelatives(t, fullPath=True, parent=True)]
     if not roots:
         raise ValueError(f'Usd file is empty: {usd_path}')
-    return mc.parent(roots, parent)
+    return mc.ls(mc.parent(roots, parent), long=True)
 
 
 def set_transform(prim, position, rotation, scale):
