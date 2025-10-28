@@ -10,7 +10,7 @@ from contextlib import contextmanager
 try:
     from PySide6 import QtWidgets, QtCore, QtGui
     import shiboken6 as shiboken
-except ModuleNotFoundError:
+except (ModuleNotFoundError, ImportError):
     from PySide2 import QtWidgets, QtCore, QtGui
     import shiboken2 as shiboken
 
