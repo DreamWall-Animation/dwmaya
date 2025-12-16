@@ -10,7 +10,7 @@ __license__ = 'MIT'
 import maya.cmds as mc
 try:
     from PySide6 import QtWidgets, QtCore
-except ModuleNotFoundError:
+except BaseException:
     from PySide2 import QtWidgets, QtCore
 
 from dwmaya.ui.qt import get_maya_window
