@@ -22,6 +22,9 @@ from dwmaya.namespace import get_non_existing_namespace, strip_namespaces
 
 ANIMATION_CURVE_TYPES = (
     'animCurveTA', 'animCurveTL', 'animCurveTT', 'animCurveTU')
+ROTATION_TYPES = (
+    oma.MFnAnimCurve.kAnimCurveTA,
+    oma.MFnAnimCurve.kAnimCurveUA)
 
 
 ANIMATION_NODE_TYPES = (
@@ -79,7 +82,8 @@ def get_anim_curves():
 
 def list_curves_with_infinite_set(
         curves=None, pre=True, post=False, types=None):
-    """ List the animtion curves which has post or pre virtual animation set on.
+    """
+    List the animtion curves which has post or pre virtual animation set on.
     :param curves: list() of str. Name of the animation curves. If it is
     set to none, function will check all the scene anim curves.
     :param pre: bool list curve with pre infinite set
@@ -580,7 +584,7 @@ def bake_animation(
 
 
 def add_pre_post_roll(
-        anim_curves=None, start=None, end=None, pre_frames=10, post_frames=10):
+        anim_curves=None, start=None, end=None, pre_frames=1, post_frames=0):
     """
     On each curve, add a key at the the preroll and post roll frames.
     Set their value to follow the tangent of the first/last key.
@@ -596,6 +600,7 @@ def add_pre_post_roll(
         om2_curve = node_names_to_mfn_anim_curves([curve_name])[0]
         if om_curve.isStatic():
             continue
+
         # Pre-roll:
         first_frame = om_curve.time(0).value()
         delta = first_frame - pre_frame
@@ -604,11 +609,14 @@ def add_pre_post_roll(
             angle = om2_curve.getTangentAngleWeight(0, False)[0].value
             if angle != 0:
                 offset = math.tan(angle) * delta
+                if om2_curve.animCurveType in ROTATION_TYPES:
+                    offset = math.radians(offset)
                 om_curve.addKey(
                     om.MTime(pre_frame, time_unit),
                     value - offset,
                     oma2.MFnAnimCurve.kTangentLinear,
                     oma2.MFnAnimCurve.kTangentLinear)
+
         # Post-roll:
         i = om_curve.numKeys() - 1
         last_frame = om_curve.time(i).value()
@@ -618,7 +626,9 @@ def add_pre_post_roll(
             om2_curve = node_names_to_mfn_anim_curves([curve_name])[0]
             angle = om2_curve.getTangentAngleWeight(i, True)[0].value
             if angle != 0:
-                offset = math.tan(angle) * delta
+                offset = math.radians(math.tan(angle) * delta)
+                if om2_curve.animCurveType in ROTATION_TYPES:
+                    offset = math.radians(offset)
                 om_curve.addKey(
                     om.MTime(post_frame, time_unit),
                     value + offset,
