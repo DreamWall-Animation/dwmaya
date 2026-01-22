@@ -645,6 +645,8 @@ def set_preroll_keys(first_frame=101, anim_curves=None):
         om_curve = get_openmaya_curve(curve_name)
         if om_curve.isStatic():
             continue
+        if om_curve.time(0).value() > first_frame:
+            continue  # Dont add key if there is no animation at first frame
         pre_value = om_curve.evaluate(om.MTime(first_frame - 1, time_unit))
         first_frame_value = om_curve.evaluate(om.MTime(first_frame, time_unit))
         post_value = om_curve.evaluate(om.MTime(first_frame + 1, time_unit))
