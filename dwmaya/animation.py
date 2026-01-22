@@ -623,7 +623,6 @@ def add_pre_post_roll(
         delta = post_frame - last_frame
         if delta > 0:
             value = om_curve.value(i)
-            om2_curve = node_names_to_mfn_anim_curves([curve_name])[0]
             angle = om2_curve.getTangentAngleWeight(i, True)[0].value
             if angle != 0:
                 offset = math.radians(math.tan(angle) * delta)
@@ -634,3 +633,50 @@ def add_pre_post_roll(
                     value + offset,
                     oma2.MFnAnimCurve.kTangentLinear,
                     oma2.MFnAnimCurve.kTangentLinear)
+
+
+def set_preroll_keys(first_frame=101, anim_curves=None):
+    """
+    This version uses the values instead of the tangeant.
+    """
+    time_unit = om.MTime.uiUnit()
+    anim_curves = anim_curves or get_anim_curves()
+    for curve_name in anim_curves:
+        om_curve = get_openmaya_curve(curve_name)
+        if om_curve.isStatic():
+            continue
+        pre_value = om_curve.evaluate(om.MTime(first_frame - 1, time_unit))
+        first_frame_value = om_curve.evaluate(om.MTime(first_frame, time_unit))
+        post_value = om_curve.evaluate(om.MTime(first_frame + 1, time_unit))
+        delta = post_value - first_frame_value
+        new_value = first_frame_value - delta
+        if new_value != pre_value:
+            om_curve.addKey(
+                om.MTime(first_frame - 1, time_unit),
+                new_value,
+                oma2.MFnAnimCurve.kTangentLinear,
+                oma2.MFnAnimCurve.kTangentLinear)
+
+
+def check_preroll(first_frame=101, threshold=.5):
+    bad_curves = []
+    time_unit = om.MTime.uiUnit()
+    for curve_name in get_anim_curves():
+        om_curve = get_openmaya_curve(curve_name)
+        if om_curve.isStatic():
+            continue
+        pre_value = om_curve.evaluate(om.MTime(first_frame - 1, time_unit))
+        first_frame_value = om_curve.evaluate(om.MTime(first_frame, time_unit))
+        post_value = om_curve.evaluate(om.MTime(first_frame + 1, time_unit))
+        if first_frame_value == post_value == pre_value:
+            continue
+        pre_delta = pre_value - first_frame_value
+        post_delta = first_frame_value - post_value
+        try:
+            # threshold.5 = animation can be 50% faster/slower at most:
+            bad = threshold > (pre_delta / post_delta) > (1 + threshold)
+        except ZeroDivisionError:
+            bad = True
+        if bad:
+            bad_curves.append(curve_name)
+    return bad_curves
