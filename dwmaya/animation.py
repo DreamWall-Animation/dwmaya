@@ -653,6 +653,8 @@ def set_preroll_keys(first_frame=101, anim_curves=None):
         delta = post_value - first_frame_value
         new_value = first_frame_value - delta
         if new_value != pre_value:
+            # insert key to preserve curve shape:
+            mc.setKeyframe(curve_name, insert=True, time=[first_frame_value])
             om_curve.addKey(
                 om.MTime(first_frame - 1, time_unit),
                 new_value,
