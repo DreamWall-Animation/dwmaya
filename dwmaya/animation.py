@@ -663,24 +663,35 @@ def set_preroll_keys(first_frame=101, anim_curves=None):
 
 
 def check_preroll(first_frame=101, threshold=.5):
+    """
+    Check preroll by comparing values offset between 1st frame with values
+    of next and previous frame.
+
+    `threshold` is the allowed % off the expected preroll values
+    """
+
     bad_curves = []
     time_unit = om.MTime.uiUnit()
     for curve_name in get_anim_curves():
         om_curve = get_openmaya_curve(curve_name)
         if om_curve.isStatic():
             continue
-        pre_value = om_curve.evaluate(om.MTime(first_frame - 1, time_unit))
         first_frame_value = om_curve.evaluate(om.MTime(first_frame, time_unit))
         post_value = om_curve.evaluate(om.MTime(first_frame + 1, time_unit))
+        pre_value = om_curve.evaluate(om.MTime(first_frame - 1, time_unit))
         if first_frame_value == post_value == pre_value:
             continue
-        pre_delta = pre_value - first_frame_value
+
         post_delta = first_frame_value - post_value
-        try:
-            # threshold.5 = animation can be 50% faster/slower at most:
-            bad = threshold > (pre_delta / post_delta) > (1 + threshold)
-        except ZeroDivisionError:
-            bad = True
-        if bad:
+        # expected_value = first_frame_value + post_delta
+        # threshold.5 = animation can be 50% faster/slower at most:
+        min_expected_value = first_frame_value + (post_delta * (1 - threshold))
+        max_expected_value = first_frame_value + (post_delta * (1 + threshold))
+        if post_delta < 0:
+            min_expected_value, max_expected_value = (
+                max_expected_value, min_expected_value)
+
+        if not min_expected_value < pre_value < max_expected_value:
             bad_curves.append(curve_name)
+
     return bad_curves
