@@ -683,6 +683,9 @@ def check_preroll(first_frame=101, threshold=.5):
             continue
 
         post_delta = first_frame_value - post_value
+        if post_delta < 0.0001:
+            continue  # skip -1.734723475976807e-18
+
         # expected_value = first_frame_value + post_delta
         # threshold.5 = animation can be 50% faster/slower at most:
         min_expected_value = first_frame_value + (post_delta * (1 - threshold))
