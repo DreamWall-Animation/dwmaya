@@ -56,7 +56,6 @@ def export_geo_usd(path, roots=None):
         mergeTransformAndShape=0,
         stripNamespaces=1,
     )
-    options = ';'.join(options)
     export_to_usd(path, options, roots)
 
 
