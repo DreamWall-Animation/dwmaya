@@ -214,7 +214,10 @@ class ReferenceCacherWidget(QtWidgets.QWidget):
         headers = ['Asset Name', 'Status', 'Last Cache Date']
         scene_path = os.path.dirname(mc.file(query=True, sceneName=True))
         assets = [[r, 'Reference'] for r in sorted(mc.ls(references=True))]
-        cached_files = os.listdir(os.path.join(scene_path, 'cache'))
+        cache_dir = os.path.join(scene_path, 'cache')
+        cached_files = (
+            os.listdir(cache_dir)
+            if scene_path and os.path.exists(cache_dir) else [])
 
         for asset in assets:
             ref_node = asset[0]
@@ -266,6 +269,9 @@ _cache_manager_window = None
 
 
 def show_cache_manager():
+    if not mc.file(query=True, sceneName=True):
+        QtWidgets.QMessageBox.critical(None, 'Error', 'Current file not saved')
+        return
     global _cache_manager_window
     if _cache_manager_window is not None:
         _cache_manager_window.close()
