@@ -1,3 +1,4 @@
+import sys
 import maya.cmds as mc
 
 
@@ -30,3 +31,13 @@ def create_bbox_curve(transform, color=None):
             mc.setAttr(shp + ".overrideEnabled", 1)
             mc.setAttr(shp + ".overrideRGBColors", 1)
             mc.setAttr(shp + ".overrideColorRGB", *color)
+
+
+def get_combined_bbox(nodes):
+    xmin = ymin = zmin = sys.float_info.max
+    xmax = ymax = zmax = -sys.float_info.max
+    for node in nodes:
+        bb = mc.xform(node, boundingBox=True, query=True, worldSpace=True)
+        xmin, ymin, zmin = min(xmin, bb[0]), min(ymin, bb[1]), min(zmin, bb[2])
+        xmax, ymax, zmax = max(xmax, bb[3]), max(ymax, bb[4]), max(zmax, bb[5])
+    return [xmin, ymin, zmin, xmax, ymax, zmax]
