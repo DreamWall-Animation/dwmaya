@@ -26,7 +26,6 @@ def connect_attr(source, destination):
             sub_destination = '{}[{}]'.format(destination, i)
             i += 1
         destination = sub_destination
-    mc.connectAttr(source, destination)
 
 
 def get_attr(node, attr):
@@ -38,7 +37,7 @@ def set_attr(node, attr, value, skip_locked_connected=False):
     if skip_locked_connected:
         if mc.getAttr(attribute, locked=True) or mc.listConnections(attribute):
             return
-    if isinstance(value, list):
+    if isinstance(value, (list, tuple)):
         mc.setAttr(attribute, *value)
     elif isinstance(value, str):
         mc.setAttr(attribute, value, type='string')
