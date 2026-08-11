@@ -5,7 +5,7 @@ the Maya node names as argument.
 """
 
 import maya.cmds as mc
-from dwmaya.__curve import ANIMATION_CURVE_TYPES, list_non_static_anim_curves
+from dwmaya.animation import ANIMATION_CURVE_TYPES, list_non_static_anim_curves
 from dwmaya.keyframe import (
     retime_animation_curves, hold_animation_curves, trim_animation_curves)
 
