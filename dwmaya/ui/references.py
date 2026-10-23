@@ -32,7 +32,6 @@ class ReferencesLister(QtWidgets.QTableWidget):
         unload_action.triggered.connect(self.unload_selection)
         self.menu.addAction(unload_action)
 
-
     def fill(self):
         self.clear()
         reference_nodes = get_references()
